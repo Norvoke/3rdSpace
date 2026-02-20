@@ -47,7 +47,7 @@ export default function EditProfilePage() {
       }),
     onSuccess: ({ data }) => {
       updateUser(data.user);
-      navigate(`/~${user?.username}`);
+      navigate(`/u/${user?.username}`);
     },
   });
 
@@ -162,7 +162,7 @@ export default function EditProfilePage() {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate(`/~${user?.username}`)}
+              onClick={() => navigate(`/u/${user?.username}`)}
             >
               Cancel
             </button>

@@ -46,7 +46,7 @@ export default function SearchPage() {
 
         <div className={styles.results}>
           {data?.users?.map((u: any) => (
-            <Link to={`/~${u.username}`} key={u._id} className={`card ${styles.result}`}>
+            <Link to={`/u/${u.username}`} key={u._id} className={`card ${styles.result}`}>
               <img
                 src={u.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${u.username}`}
                 className={styles.avatar}
