@@ -1,0 +1,116 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Frosted glass navbar — the signature Aero element */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(210, 232, 252, 0.72);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 0 rgba(160, 190, 225, 0.4), 0 4px 20px rgba(40, 80, 140, 0.08);
+}
+
+.navInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+.logoAccent {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 300;
+}
+
+.navLinks {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.navLink {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary) !important;
+  padding: 0.35rem 0.85rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.18s;
+}
+.navLink:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255,255,255,0.6);
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.navAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 1px 4px rgba(40,80,140,0.2);
+}
+
+.main {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+.footer {
+  border-top: 1px solid rgba(255,255,255,0.7);
+  background: rgba(210, 232, 252, 0.5);
+  backdrop-filter: blur(12px);
+  padding: 1.5rem;
+  margin-top: 4rem;
+}
+
+.footerInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerLogo {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.footerTagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}

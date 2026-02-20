@@ -1,0 +1,178 @@
+.page { padding-bottom: 3rem; }
+
+.loading {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-style: italic;
+}
+
+.banner {
+  height: 220px;
+  background: linear-gradient(135deg,
+    rgba(90, 163, 237, 0.75) 0%,
+    rgba(56, 182, 232, 0.65) 50%,
+    rgba(130, 200, 255, 0.6) 100%);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 265px 1fr;
+  gap: 1.75rem;
+  margin-top: -65px;
+  align-items: start;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profileCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.avatar {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 4px solid white;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(40, 80, 140, 0.25);
+}
+
+.displayName {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-style: italic;
+  margin-top: 0.25rem;
+  color: var(--text-primary);
+}
+
+.username {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}
+
+.mood {
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-style: italic;
+  font-family: var(--font-body);
+}
+
+.bio {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  text-align: left;
+  border-top: 1px solid rgba(180, 210, 240, 0.35);
+  padding-top: 0.75rem;
+  font-family: var(--font-body);
+}
+
+.profileMeta {
+  text-align: left;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: var(--font-ui);
+}
+
+.metaItem { color: var(--text-secondary); }
+
+.friendCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(180, 210, 240, 0.35);
+  padding-top: 0.5rem;
+  font-family: var(--font-ui);
+}
+
+.actions { margin-top: 0.25rem; }
+.actions .btn { width: 100%; justify-content: center; }
+.friendBadge { font-size: 0.82rem; color: #27855a; font-family: var(--font-ui); }
+.pending { font-size: 0.82rem; color: var(--text-muted); font-style: italic; }
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.friendThumb {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.friendThumb:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow);
+}
+
+.wall {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 75px;
+}
+
+.aboutMe {
+  font-size: 0.925rem;
+  line-height: 1.7;
+  font-family: var(--font-body);
+}
+
+.songCard iframe {
+  margin-top: 0.5rem;
+  border-radius: var(--radius);
+}
+
+.private {
+  text-align: center;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.privateAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .wall { padding-top: 1rem; }
+}

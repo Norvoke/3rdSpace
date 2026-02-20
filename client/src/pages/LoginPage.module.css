@@ -1,0 +1,175 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+/* Soft Aero background orbs */
+.page::before {
+  content: '';
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180, 220, 255, 0.5) 0%, transparent 70%);
+  top: -200px;
+  left: -100px;
+  pointer-events: none;
+}
+.page::after {
+  content: '';
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 230, 255, 0.4) 0%, transparent 70%);
+  bottom: -150px;
+  right: -100px;
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(160, 195, 230, 0.4);
+  border-right-color: rgba(160, 195, 230, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 3rem 2.75rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow:
+    0 32px 80px rgba(40, 80, 140, 0.18),
+    0 8px 24px rgba(40, 80, 140, 0.1),
+    inset 0 1px 0 rgba(255,255,255,1);
+  animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+}
+.logoAccent {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 300;
+}
+
+.tagline {
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin-bottom: 1.75rem;
+}
+
+.divider {
+  position: relative;
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(160, 195, 230, 0.6), transparent);
+  margin: 1.5rem 0;
+}
+
+.error {
+  color: #c0392b;
+  font-size: 0.82rem;
+  font-family: var(--font-ui);
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 80, 60, 0.08);
+  border: 1px solid rgba(255, 80, 60, 0.25);
+  border-radius: var(--radius);
+}
+
+.googleBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(240,247,255,0.9));
+  border: 1px solid rgba(160, 195, 230, 0.7);
+  border-top-color: rgba(255,255,255,1);
+  border-radius: 22px;
+  color: var(--text-primary);
+  font-size: 0.925rem;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  transition: all 0.2s ease;
+  box-shadow:
+    0 2px 8px rgba(40, 80, 140, 0.1),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  position: relative;
+  overflow: hidden;
+}
+.googleBtn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+  border-radius: 22px 22px 0 0;
+  pointer-events: none;
+}
+.googleBtn:hover {
+  background: linear-gradient(to bottom, #ffffff, rgba(235, 246, 255, 0.95));
+  box-shadow: 0 4px 16px rgba(40, 80, 140, 0.18), inset 0 1px 0 rgba(255,255,255,1);
+  transform: translateY(-1px);
+  border-color: var(--accent-light);
+}
+
+.footnote {
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}
+
+.marqueeWrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  padding: 0.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.7);
+  background: rgba(210, 232, 252, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.marquee {
+  display: flex;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  letter-spacing: 0.06em;
+  animation: marquee 35s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
