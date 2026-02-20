@@ -54,6 +54,17 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: '3rdSpace API is running' });
 });
 
+import path from 'path';
+
+// Serve React app in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuild = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientBuild));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientBuild, 'index.html'));
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`🚀 3rdSpace server running on http://localhost:${PORT}`);
 });
