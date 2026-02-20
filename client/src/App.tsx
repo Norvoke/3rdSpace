@@ -47,7 +47,7 @@ export default function App() {
           element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>}
         />
         <Route path="search" element={<SearchPage />} />
-        <Route path="~:username" element={<ProfilePage />} />
+        <Route path="u/:username" element={<ProfilePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

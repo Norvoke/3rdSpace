@@ -63,7 +63,7 @@ export default function PostCard({ post, onDelete }: Props) {
   return (
     <article className={`card ${styles.post} animate-in`}>
       <header className={styles.header}>
-        <Link to={`/~${post.author.username}`} className={styles.authorLink}>
+        <Link to={`/u/${post.author.username}`} className={styles.authorLink}>
           <img
             src={post.author.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${post.author.username}`}
             alt={post.author.displayName}
@@ -117,7 +117,7 @@ export default function PostCard({ post, onDelete }: Props) {
         <div className={styles.comments}>
           {post.comments.map((c: any) => (
             <div key={c._id} className={styles.comment}>
-              <Link to={`/~${c.author.username}`}>
+              <Link to={`/u/${c.author.username}`}>
                 <img
                   src={c.author.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${c.author.username}`}
                   className={styles.commentAvatar}

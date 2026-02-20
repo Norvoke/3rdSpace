@@ -29,7 +29,7 @@ export default function Layout() {
           <div className={styles.navActions}>
             {isAuthenticated && user ? (
               <>
-                <Link to={`/~${user.username}`} className={styles.navLink}>
+                <Link to={`/u/${user.username}`} className={styles.navLink}>
                   <img
                     src={user.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${user.username}`}
                     alt={user.displayName}

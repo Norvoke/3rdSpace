@@ -61,14 +61,20 @@ app.get('/health', (_req, res) => {
 
 import path from 'path';
 
-// Serve React app in production
-if (process.env.NODE_ENV === 'production') {
-  const clientBuild = path.join(__dirname, '../../client/dist');
-  app.use(express.static(clientBuild));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(clientBuild, 'index.html'));
+
+// Serve React app — always, not just in production
+const clientBuild = path.join(__dirname, '../../client/dist');
+console.log('Serving client from:', clientBuild);
+app.use(express.static(clientBuild));
+app.get('*', (_req, res) => {
+  const index = path.join(clientBuild, 'index.html');
+  res.sendFile(index, err => {
+    if (err) {
+      console.error('Failed to serve index.html:', index, err);
+      res.status(500).send('Client build not found');
+    }
   });
-}
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 3rdSpace server running on http://localhost:${PORT}`);

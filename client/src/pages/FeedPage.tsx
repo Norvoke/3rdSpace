@@ -77,7 +77,7 @@ export default function FeedPage() {
           <div className="card">
             <h3 className={styles.sidebarTitle}>Your Profile</h3>
             {user && (
-              <a href={`/~${user.username}`} className={styles.sidebarUser}>
+              <a href={`/u/${user.username}`} className={styles.sidebarUser}>
                 <img
                   src={user.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${user.username}`}
                   alt={user.displayName}
