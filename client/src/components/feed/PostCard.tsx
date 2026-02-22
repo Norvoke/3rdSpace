@@ -43,7 +43,7 @@ export default function PostCard({ post, onDelete }: Props) {
     queryClient.invalidateQueries({ queryKey: ['feed'] });
     queryClient.invalidateQueries({ queryKey: ['group'] });
     queryClient.invalidateQueries({ queryKey: ['public-wall'] });
-    queryClient.invalidateQueries({ queryKey: ['profile-posts'] });
+    queryClient.invalidateQueries({ queryKey: ["profile"], exact: false });
   };
 
   const likeMutation = useMutation({
