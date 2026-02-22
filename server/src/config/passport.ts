@@ -29,7 +29,7 @@ export const configurePassport = (): void => {
           if (user) return done(null, user);
 
           const email = profile.emails?.[0]?.value;
-          const avatar = profile.photos?.[0]?.value;
+          const avatar = profile.photos?.[0]?.value?.replace('=s96-c', '=s400-c');
           const baseUsername = (profile.displayName || email?.split('@')[0] || 'user')
             .toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
 
