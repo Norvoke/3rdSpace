@@ -9,7 +9,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import postRoutes from './routes/posts';
 import friendRoutes from './routes/friends';
-import MongoStore from 'connect-mongo';
+import notificationRoutes from './routes/notifications';
 
 dotenv.config();
 
@@ -35,13 +35,9 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback_secret',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI!,
-    ttl: 24 * 60 * 60, // 1 day in seconds
-  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 }));
 
@@ -53,27 +49,11 @@ app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: '3rdSpace API is running' });
-});
-
-import path from 'path';
-
-
-// Serve React app — always, not just in production
-const clientBuild = path.join(__dirname, '../../client/dist');
-console.log('Serving client from:', clientBuild);
-app.use(express.static(clientBuild));
-app.get('*', (_req, res) => {
-  const index = path.join(clientBuild, 'index.html');
-  res.sendFile(index, err => {
-    if (err) {
-      console.error('Failed to serve index.html:', index, err);
-      res.status(500).send('Client build not found');
-    }
-  });
 });
 
 app.listen(PORT, () => {

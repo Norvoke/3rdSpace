@@ -11,6 +11,7 @@ export default function EditProfilePage() {
 
   const [form, setForm] = useState({
     displayName: '',
+    avatar: '',
     bio: '',
     location: '',
     website: '',
@@ -22,10 +23,13 @@ export default function EditProfilePage() {
     isPrivate: false,
   });
 
+  const [avatarPreview, setAvatarPreview] = useState('');
+
   useEffect(() => {
     if (user) {
       setForm({
         displayName: user.displayName || '',
+        avatar: user.avatar || '',
         bio: user.bio || '',
         location: user.location || '',
         website: user.website || '',
@@ -36,6 +40,7 @@ export default function EditProfilePage() {
         interests: (user.interests || []).join(', '),
         isPrivate: user.isPrivate || false,
       });
+      setAvatarPreview(user.avatar || '');
     }
   }, [user]);
 
@@ -53,12 +58,18 @@ export default function EditProfilePage() {
 
   const set = (field: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setForm(prev => ({ ...prev, [field]: e.target.value }));
+  ) => {
+    const value = e.target.value;
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (field === 'avatar') setAvatarPreview(value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfile.mutate(form);
   };
+
+  const fallbackAvatar = `https://api.dicebear.com/8.x/identicon/svg?seed=${user?.username}`;
 
   return (
     <div className="container">
@@ -66,7 +77,42 @@ export default function EditProfilePage() {
         <h1 className={styles.title}>Edit Profile</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Basics */}
+
+          <section className={`card ${styles.section}`}>
+            <h2 className={styles.sectionTitle}> Profile Photo</h2>
+            <div className={styles.avatarRow}>
+              <img
+                src={avatarPreview || fallbackAvatar}
+                alt="Avatar preview"
+                className={styles.avatarPreview}
+                onError={e => { (e.target as HTMLImageElement).src = fallbackAvatar; }}
+              />
+              <div className={styles.avatarFields}>
+                <div className={styles.field}>
+                  <label>Image URL</label>
+                  <input
+                    value={form.avatar}
+                    onChange={set('avatar')}
+                    placeholder="https://example.com/your-photo.jpg"
+                  />
+                </div>
+                <p className="text-muted" style={{ marginTop: '0.25rem' }}>
+                  Paste any direct image link. Leave blank to use your Google photo.
+                </p>
+                {form.avatar && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    style={{ marginTop: '0.5rem', width: 'fit-content' }}
+                    onClick={() => { setForm(p => ({ ...p, avatar: '' })); setAvatarPreview(''); }}
+                  >
+                    ✕ Reset to Google photo
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+
           <section className={`card ${styles.section}`}>
             <h2 className={styles.sectionTitle}>Basics</h2>
             <div className={styles.field}>
@@ -106,7 +152,6 @@ export default function EditProfilePage() {
             </label>
           </section>
 
-          {/* Music */}
           <section className={`card ${styles.section}`}>
             <h2 className={styles.sectionTitle}>🎵 Profile Song</h2>
             <p className="text-muted" style={{ marginBottom: '0.75rem' }}>
@@ -114,70 +159,43 @@ export default function EditProfilePage() {
             </p>
             <div className={styles.field}>
               <label>Song Embed URL</label>
-              <input
-                value={form.song}
-                onChange={set('song')}
-                placeholder="https://w.soundcloud.com/player/?url=..."
-              />
+              <input value={form.song} onChange={set('song')} placeholder="https://w.soundcloud.com/player/?url=..." />
             </div>
           </section>
 
-          {/* Custom HTML */}
           <section className={`card ${styles.section}`}>
             <h2 className={styles.sectionTitle}>📝 About Me (HTML)</h2>
             <p className="text-muted" style={{ marginBottom: '0.75rem' }}>
               Go wild. This renders as HTML on your profile — tables, images, marquees welcome.
             </p>
             <div className={styles.field}>
-              <textarea
-                value={form.customHTML}
-                onChange={set('customHTML')}
-                rows={8}
-                placeholder="<p>Hi! I'm a <b>cool person</b>.</p>"
-                className={styles.codeArea}
-                maxLength={20000}
-              />
+              <textarea value={form.customHTML} onChange={set('customHTML')} rows={8}
+                placeholder="<p>Hi! I'm a <b>cool person</b>.</p>" className={styles.codeArea} maxLength={20000} />
             </div>
           </section>
 
-          {/* Custom CSS */}
           <section className={`card ${styles.section}`}>
             <h2 className={styles.sectionTitle}>🎨 Custom CSS</h2>
             <p className="text-muted" style={{ marginBottom: '0.75rem' }}>
               Override anything. Change colors, fonts, backgrounds — make it truly yours.
             </p>
             <div className={styles.field}>
-              <textarea
-                value={form.customCSS}
-                onChange={set('customCSS')}
-                rows={10}
-                placeholder={`/* Example */\nbody { background: #ff00ff !important; }\n.card { border-color: lime !important; }`}
-                className={styles.codeArea}
-                maxLength={10000}
-              />
+              <textarea value={form.customCSS} onChange={set('customCSS')} rows={10}
+                placeholder={`/* Example */\nbody { background: #ff00ff !important; }`}
+                className={styles.codeArea} maxLength={10000} />
             </div>
           </section>
 
           <div className={styles.actions}>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => navigate(`/u/${user?.username}`)}
-            >
+            <button type="button" className="btn btn-ghost" onClick={() => navigate(`/u/${user?.username}`)}>
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={updateProfile.isPending}
-            >
+            <button type="submit" className="btn btn-primary" disabled={updateProfile.isPending}>
               {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
 
-          {updateProfile.isError && (
-            <p className="text-error">Failed to save. Please try again.</p>
-          )}
+          {updateProfile.isError && <p className="text-error">Failed to save. Please try again.</p>}
         </form>
       </div>
     </div>

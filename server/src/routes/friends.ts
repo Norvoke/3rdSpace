@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import User from '../models/User';
+import Notification from '../models/Notification';
 
 const router = Router();
 
@@ -10,32 +11,26 @@ router.post('/request/:userId', requireAuth, async (req: AuthRequest, res: Respo
     const targetId = req.params.userId;
     const currentId = req.user!._id.toString();
 
-    if (targetId === currentId) {
-      res.status(400).json({ error: "You can't friend yourself" });
-      return;
-    }
+    if (targetId === currentId) { res.status(400).json({ error: "You can't friend yourself" }); return; }
 
     const target = await User.findById(targetId);
-    if (!target) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
+    if (!target) { res.status(404).json({ error: 'User not found' }); return; }
 
     const alreadyFriends = target.friends.some(id => id.toString() === currentId);
     const requestExists = target.friendRequests.some(id => id.toString() === currentId);
 
-    if (alreadyFriends) {
-      res.status(409).json({ error: 'Already friends' });
-      return;
-    }
-
-    if (requestExists) {
-      res.status(409).json({ error: 'Friend request already sent' });
-      return;
-    }
+    if (alreadyFriends) { res.status(409).json({ error: 'Already friends' }); return; }
+    if (requestExists) { res.status(409).json({ error: 'Friend request already sent' }); return; }
 
     await User.findByIdAndUpdate(targetId, {
       $addToSet: { friendRequests: req.user!._id },
+    });
+
+    // Notify the target
+    await Notification.create({
+      recipient: targetId,
+      sender: req.user!._id,
+      type: 'friend_request',
     });
 
     res.json({ message: 'Friend request sent' });
@@ -49,22 +44,11 @@ router.post('/accept/:userId', requireAuth, async (req: AuthRequest, res: Respon
   try {
     const requesterId = req.params.userId;
     const currentUser = await User.findById(req.user!._id);
+    if (!currentUser) { res.status(404).json({ error: 'User not found' }); return; }
 
-    if (!currentUser) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
+    const hasPendingRequest = currentUser.friendRequests.some(id => id.toString() === requesterId);
+    if (!hasPendingRequest) { res.status(400).json({ error: 'No pending friend request from this user' }); return; }
 
-    const hasPendingRequest = currentUser.friendRequests.some(
-      id => id.toString() === requesterId
-    );
-
-    if (!hasPendingRequest) {
-      res.status(400).json({ error: 'No pending friend request from this user' });
-      return;
-    }
-
-    // Add each other as friends and remove the request
     await User.findByIdAndUpdate(req.user!._id, {
       $addToSet: { friends: requesterId },
       $pull: { friendRequests: requesterId },
@@ -72,6 +56,13 @@ router.post('/accept/:userId', requireAuth, async (req: AuthRequest, res: Respon
 
     await User.findByIdAndUpdate(requesterId, {
       $addToSet: { friends: req.user!._id },
+    });
+
+    // Notify the requester their request was accepted
+    await Notification.create({
+      recipient: requesterId,
+      sender: req.user!._id,
+      type: 'friend_accepted',
     });
 
     res.json({ message: 'Friend request accepted' });
@@ -95,12 +86,8 @@ router.delete('/request/:userId', requireAuth, async (req: AuthRequest, res: Res
 // Remove a friend
 router.delete('/:userId', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    await User.findByIdAndUpdate(req.user!._id, {
-      $pull: { friends: req.params.userId },
-    });
-    await User.findByIdAndUpdate(req.params.userId, {
-      $pull: { friends: req.user!._id },
-    });
+    await User.findByIdAndUpdate(req.user!._id, { $pull: { friends: req.params.userId } });
+    await User.findByIdAndUpdate(req.params.userId, { $pull: { friends: req.user!._id } });
     res.json({ message: 'Friend removed' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to remove friend' });

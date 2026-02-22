@@ -1,5 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import NotificationBell from './NotificationBell';
 import styles from './Layout.module.css';
 
 export default function Layout() {
@@ -29,13 +30,14 @@ export default function Layout() {
           <div className={styles.navActions}>
             {isAuthenticated && user ? (
               <>
-                <Link to={`/u/${user.username}`} className={styles.navLink}>
+                <NotificationBell />
+                <Link to={`/u/${user.username}`} className={styles.userChip}>
                   <img
                     src={user.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${user.username}`}
                     alt={user.displayName}
                     className={styles.navAvatar}
                   />
-                  {user.displayName}
+                  <span className={styles.navName}>{user.displayName}</span>
                 </Link>
                 <button onClick={handleLogout} className="btn btn-ghost btn-sm">
                   Log out

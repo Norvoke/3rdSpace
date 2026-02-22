@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import Post from '../models/Post';
 import User from '../models/User';
+import Notification from '../models/Notification';
 import mongoose from 'mongoose';
 
 const router = Router();
@@ -21,9 +22,9 @@ router.get('/feed', requireAuth, async (req: AuthRequest, res: Response) => {
         { author: { $in: [...friendIds, req.user!._id] }, visibility: { $in: ['public', 'friends'] } },
         { author: req.user!._id },
       ],
-      targetProfile: { $exists: false }, // Exclude wall posts from main feed
+      targetProfile: { $exists: false },
     })
-      .sort({ createdAt: -1 }) // Strict chronological — no score, no ranking
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate('author', 'username displayName avatar')
@@ -47,7 +48,6 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    // Wall post validation
     if (targetProfile) {
       const target = await User.findById(targetProfile);
       if (!target) {
@@ -64,6 +64,16 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       visibility: visibility || 'friends',
     });
 
+    // Notify profile owner of wall post (if not posting on own wall)
+    if (targetProfile && targetProfile !== req.user!._id.toString()) {
+      await Notification.create({
+        recipient: targetProfile,
+        sender: req.user!._id,
+        type: 'wall_post',
+        post: post._id,
+      });
+    }
+
     const populated = await post.populate('author', 'username displayName avatar');
     res.status(201).json({ post: populated });
   } catch (error) {
@@ -75,16 +85,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 router.delete('/:postId', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.postId);
-    if (!post) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
-    }
-
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
     if (post.author.toString() !== req.user!._id.toString()) {
-      res.status(403).json({ error: 'Not authorized' });
-      return;
+      res.status(403).json({ error: 'Not authorized' }); return;
     }
-
     await post.deleteOne();
     res.json({ message: 'Post deleted' });
   } catch (error) {
@@ -96,10 +100,7 @@ router.delete('/:postId', requireAuth, async (req: AuthRequest, res: Response) =
 router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { content } = req.body;
-    if (!content?.trim()) {
-      res.status(400).json({ error: 'Comment content required' });
-      return;
-    }
+    if (!content?.trim()) { res.status(400).json({ error: 'Comment content required' }); return; }
 
     const post = await Post.findByIdAndUpdate(
       req.params.postId,
@@ -116,9 +117,45 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
       { new: true }
     ).populate('comments.author', 'username displayName avatar');
 
-    if (!post) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
+
+    const senderId = req.user!._id.toString();
+
+    // Notify post author of comment (if not commenting on own post)
+    if (post.author.toString() !== senderId) {
+      await Notification.create({
+        recipient: post.author,
+        sender: req.user!._id,
+        type: 'comment',
+        post: post._id,
+      });
+    }
+
+    // Notify wall profile owner if this is a wall post and they're not the commenter or author
+    if (post.targetProfile && post.targetProfile.toString() !== senderId && post.targetProfile.toString() !== post.author.toString()) {
+      await Notification.create({
+        recipient: post.targetProfile,
+        sender: req.user!._id,
+        type: 'reply',
+        post: post._id,
+      });
+    }
+
+    // Notify other commenters of the reply (deduplicated, not the current commenter or post author)
+    const notifyIds = new Set<string>();
+    for (const c of post.comments.slice(0, -1)) {
+      const authorId = (c.author as any)._id?.toString() || c.author.toString();
+      if (authorId !== senderId && authorId !== post.author.toString()) {
+        notifyIds.add(authorId);
+      }
+    }
+    for (const id of notifyIds) {
+      await Notification.create({
+        recipient: id,
+        sender: req.user!._id,
+        type: 'reply',
+        post: post._id,
+      });
     }
 
     res.status(201).json({ comment: post.comments[post.comments.length - 1] });
@@ -131,10 +168,7 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
 router.post('/:postId/like', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.postId);
-    if (!post) {
-      res.status(404).json({ error: 'Post not found' });
-      return;
-    }
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
 
     const userId = req.user!._id;
     const alreadyLiked = post.likes.some(id => id.toString() === userId.toString());
