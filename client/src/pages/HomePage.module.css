@@ -250,3 +250,33 @@
     margin-top: 2rem;
   }
 }
+
+.thirdPlace {
+  max-width: 640px;
+  margin: 3rem auto;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(180, 210, 240, 0.4);
+}
+
+.sectionHeading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.thirdPlaceText {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.thirdPlaceText p {
+  font-family: var(--font-body);
+  font-size: 0.975rem;
+  line-height: 1.85;
+  color: var(--text-secondary);
+}
