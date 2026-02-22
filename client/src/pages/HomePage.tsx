@@ -1,15 +1,9 @@
-import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
   const { isAuthenticated } = useAuthStore();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) navigate('/feed', { replace: true });
-  }, [isAuthenticated]);
 
   return (
     <div className={styles.page}>
@@ -25,14 +19,15 @@ export default function HomePage() {
               shaping what you see. Chronological. Personal. Yours.
             </p>
             <div className={styles.heroActions}>
-              <Link to="/login" className="btn btn-warm">
-                Claim Your Space
-              </Link>
-              <Link to="/search" className="btn btn-ghost">
-                Explore Profiles
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/feed" className="btn btn-primary">Go to Feed</Link>
+              ) : (
+                <Link to="/login" className="btn btn-warm">Claim Your Space</Link>
+              )}
+              <Link to="/search" className="btn btn-ghost">Explore Profiles</Link>
             </div>
           </div>
+
           <div className={styles.heroVisual} aria-hidden="true">
             <div className={styles.profileCard}>
               <div className={styles.profileBanner} />

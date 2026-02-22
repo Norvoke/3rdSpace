@@ -239,3 +239,10 @@ img[class*="Avatar"] {
   object-fit: cover;
   object-position: center center;
 }
+
+/* Friend grid thumbnails */
+img[class*="friendThumb"],
+img[class*="friend-thumb"] {
+  object-fit: cover;
+  object-position: center top;
+}
