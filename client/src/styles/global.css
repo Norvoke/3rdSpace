@@ -232,3 +232,10 @@ input:focus, textarea:focus, select:focus {
 .text-success { color: #27855a; }
 .text-muted   { color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-ui); }
 .text-serif   { font-family: var(--font-body); }
+
+/* Crop all avatars to center square — no squishing */
+img[class*="avatar"],
+img[class*="Avatar"] {
+  object-fit: cover;
+  object-position: center center;
+}

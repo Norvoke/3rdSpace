@@ -9,6 +9,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import postRoutes from './routes/posts';
 import friendRoutes from './routes/friends';
+import notificationRoutes from './routes/notifications';
 import MongoStore from 'connect-mongo';
 
 dotenv.config();
@@ -53,6 +54,7 @@ app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {

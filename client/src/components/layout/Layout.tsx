@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import styles from './Layout.module.css';
+import NotificationBell from './NotificationBell';
 
 export default function Layout() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -27,6 +28,7 @@ export default function Layout() {
           </div>
 
           <div className={styles.navActions}>
+            <NotificationBell />
             {isAuthenticated && user ? (
               <>
                 <Link to={`/u/${user.username}`} className={styles.navLink}>
