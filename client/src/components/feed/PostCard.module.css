@@ -148,3 +148,12 @@
   margin-top: 0.25rem;
 }
 .commentComposer input { flex: 1; }
+
+/* Cap post images to thumbnail size */
+.postImage {
+  max-height: 280px !important;
+  object-fit: cover;
+  object-position: center top;
+  width: 100%;
+  border-radius: var(--radius);
+}

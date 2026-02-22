@@ -79,3 +79,15 @@
   line-height: 1.45;
   font-family: var(--font-body);
 }
+
+@media (max-width: 600px) {
+  .searchForm {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .searchForm {
+    flex-direction: column;
+  }
+}

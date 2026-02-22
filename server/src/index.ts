@@ -9,6 +9,8 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import postRoutes from './routes/posts';
 import friendRoutes from './routes/friends';
+import groupRoutes from './routes/groups';
+import { publicWallRouter } from './routes/posts';
 import notificationRoutes from './routes/notifications';
 import MongoStore from 'connect-mongo';
 
@@ -54,6 +56,8 @@ app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/wall', publicWallRouter);
 app.use('/api/notifications', notificationRoutes);
 
 // Health check

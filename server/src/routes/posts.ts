@@ -35,7 +35,7 @@ router.get('/feed', requireAuth, async (req: AuthRequest, res: Response) => {
 
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const { content, imageUrl, targetProfile, visibility } = req.body;
+    const { content, imageUrl, targetProfile, group, isPublicWall, visibility } = req.body;
     if (!content?.trim()) { res.status(400).json({ error: 'Content is required' }); return; }
     if (targetProfile) {
       const target = await User.findById(targetProfile);
@@ -46,6 +46,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       content: content.trim(),
       imageUrl,
       targetProfile: targetProfile || undefined,
+      group: group || undefined,
+      isPublicWall: isPublicWall || false,
       visibility: visibility || 'friends',
     });
     if (targetProfile && targetProfile !== req.user!._id.toString()) {
@@ -120,3 +122,43 @@ router.post('/:postId/like', requireAuth, async (req: AuthRequest, res: Response
 });
 
 export default router;
+
+
+// Public wall — all users, chronological
+export const publicWallRouter = Router();
+
+publicWallRouter.get('/', async (req: any, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = 30;
+    const skip = (page - 1) * limit;
+    const posts = await Post.find({ isPublicWall: true })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'username displayName avatar')
+      .populate('comments.author', 'username displayName avatar');
+    const total = await Post.countDocuments({ isPublicWall: true });
+    res.json({ posts, page, totalPages: Math.ceil(total / limit) });
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch public wall' });
+  }
+});
+
+publicWallRouter.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { content } = req.body;
+    if (!content?.trim()) { res.status(400).json({ error: 'Content required' }); return; }
+    const post = await Post.create({
+      author: req.user!._id,
+      content: content.trim(),
+      isPublicWall: true,
+      visibility: 'public',
+    });
+    const populated = await post.populate('author', 'username displayName avatar');
+    res.status(201).json({ post: populated });
+  } catch (err) {
+    console.error('Wall post error:', err);
+    res.status(500).json({ error: 'Failed to post to public wall' });
+  }
+});

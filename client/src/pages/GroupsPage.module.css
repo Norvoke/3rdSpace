@@ -1,0 +1,129 @@
+.page { padding: 1rem 0 3rem; }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.sub {
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.createForm {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formTitle {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.field label {
+  font-size: 0.8rem;
+  font-family: var(--font-ui);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.formActions { display: flex; justify-content: flex-end; }
+
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-style: italic;
+  padding: 3rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.groupCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--text-primary) !important;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.groupCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 white;
+}
+
+.groupName {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.groupDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  line-height: 1.55;
+  flex: 1;
+}
+
+.groupMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  border-top: 1px solid rgba(180, 210, 240, 0.35);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

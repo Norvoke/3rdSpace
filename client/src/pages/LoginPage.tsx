@@ -19,40 +19,30 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.noise} aria-hidden="true" />
-
       <div className={styles.card}>
         <div className={styles.logo}>
           <span className={styles.logoAccent}>3rd</span>Space
         </div>
-
         <p className={styles.tagline}>
-          Your space. Your rules.<br />
-          No algorithms. No ads. Just people.
+          A place for your people.<br />
+          Non-profit. No ads. No algorithm.
         </p>
-
         <div className={styles.divider} />
-
         {error && (
-          <p className={styles.error}>
-            Sign-in failed. Please try again.
-          </p>
+          <p className={styles.error}>Sign-in failed. Please try again.</p>
         )}
-
         <button onClick={handleGoogleLogin} className={styles.googleBtn}>
           <GoogleIcon />
           Continue with Google
         </button>
-
         <p className={styles.footnote}>
-          By signing in, you agree to be excellent to each other.
+          Free to use. Always will be.
         </p>
       </div>
-
       <div className={styles.marqueeWrap} aria-hidden="true">
         <div className={styles.marquee}>
           {[...Array(8)].map((_, i) => (
-            <span key={i}>3rdSpace &nbsp;·&nbsp; no algorithms &nbsp;·&nbsp; your profile your way &nbsp;·&nbsp; </span>
+            <span key={i}>3rdSpace &nbsp;·&nbsp; non-profit &nbsp;·&nbsp; no ads &nbsp;·&nbsp; chronological &nbsp;·&nbsp; for your friends &nbsp;·&nbsp; </span>
           ))}
         </div>
       </div>

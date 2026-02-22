@@ -11,20 +11,25 @@ export default function HomePage() {
         <section className={styles.hero}>
           <div className={styles.heroText}>
             <h1 className={styles.title}>
-              Your <span className={styles.accent}>Space.</span><br />
-              Your <span className={styles.accentCyan}>Rules.</span>
+              A place for<br />
+              <span className={styles.accent}>your people.</span>
             </h1>
             <p className={styles.sub}>
-              A social network built different. No algorithmic feeds. No advertisers
-              shaping what you see. Chronological. Personal. Yours.
+              3rdSpace is a non-profit social network. There are no advertisers,
+              no algorithms, and nothing to sell you. It exists for one reason —
+              to help you stay close to the people you care about.
+            </p>
+            <p className={styles.sub}>
+              No influencers. No content. No feed designed to keep you scrolling.
+              Just your friends, their updates, and a place to talk.
             </p>
             <div className={styles.heroActions}>
               {isAuthenticated ? (
                 <Link to="/feed" className="btn btn-primary">Go to Feed</Link>
               ) : (
-                <Link to="/login" className="btn btn-warm">Claim Your Space</Link>
+                <Link to="/login" className="btn btn-primary">Join 3rdSpace</Link>
               )}
-              <Link to="/search" className="btn btn-ghost">Explore Profiles</Link>
+              <Link to="/search" className="btn btn-ghost">Find people</Link>
             </div>
           </div>
 
@@ -55,17 +60,40 @@ export default function HomePage() {
 
         <section className={styles.features}>
           {[
-            { icon: '⏱', title: 'Chronological Feed', body: 'Posts appear in the order they were written. No ranking. No boosting. Just time.' },
-            { icon: '🎨', title: 'Custom Profiles', body: 'Make your profile yours. Custom CSS, header images, bio, mood, music — the whole deal.' },
-            { icon: '🚫', title: 'Zero Ads', body: 'No advertisers. No tracking pixels. No sponsored content. You\'re not the product.' },
-            { icon: '🤝', title: 'Real Connections', body: 'Friends, wall posts, and comments. Actual human interaction, not engagement metrics.' },
+            {
+              title: 'Not the product',
+              body: 'No ads. No data sold. No investors to answer to. 3rdSpace is non-profit and always will be. Your account exists for you, not for a revenue model.',
+            },
+            {
+              title: 'Chronological, always',
+              body: "You see what your friends post, in the order they posted it. No ranking, no boosting, no posts buried because they didn't drive engagement.",
+            },
+            {
+              title: 'Your profile, your way',
+              body: 'Write your bio, set your mood, customise your page. It should feel like yours — not a template optimised for time-on-site.',
+            },
+            {
+              title: 'Real distance, real connection',
+              body: 'Whether your friends are across the city or across the world, this is a place to actually keep up with each other.',
+            },
           ].map(f => (
             <div key={f.title} className={`${styles.feature} card`}>
-              <span className={styles.featureIcon}>{f.icon}</span>
               <h3 className={styles.featureTitle}>{f.title}</h3>
               <p className={styles.featureBody}>{f.body}</p>
             </div>
           ))}
+        </section>
+
+        <section className={styles.manifesto}>
+          <p>
+            Social media was supposed to be about people. Somewhere along the way
+            it became about attention, advertising, and keeping you online as long
+            as possible. 3rdSpace is an attempt to go back — a small, quiet corner
+            of the internet where the point is just to be connected to your friends.
+          </p>
+          <p>
+            It is free. It will stay free. It is non-profit. It will stay non-profit.
+          </p>
         </section>
       </div>
     </div>

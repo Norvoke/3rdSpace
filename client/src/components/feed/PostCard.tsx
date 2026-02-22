@@ -7,9 +7,9 @@ import styles from './PostCard.module.css';
 
 interface Post {
   _id: string;
+  author: { _id: string; username: string; displayName: string; avatar?: string };
   content: string;
   imageUrl?: string;
-  author: { _id: string; username: string; displayName: string; avatar?: string };
   likes: string[];
   comments: any[];
   createdAt: string;
@@ -27,9 +27,7 @@ function timeAgo(dateStr: string): string {
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 export default function PostCard({ post, onDelete }: Props) {
@@ -38,24 +36,34 @@ export default function PostCard({ post, onDelete }: Props) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
 
-  const isOwner = user?._id === post.author._id;
   const liked = user ? post.likes.includes(user._id) : false;
+
+  // Invalidate all post-related queries regardless of which page we're on
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['feed'] });
+    queryClient.invalidateQueries({ queryKey: ['group'] });
+    queryClient.invalidateQueries({ queryKey: ['public-wall'] });
+    queryClient.invalidateQueries({ queryKey: ['profile-posts'] });
+  };
 
   const likeMutation = useMutation({
     mutationFn: () => api.post(`/api/posts/${post._id}/like`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feed'] }),
+    onSuccess: invalidateAll,
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/api/posts/${post._id}`),
-    onSuccess: () => onDelete?.(),
+    onSuccess: () => {
+      invalidateAll();
+      onDelete?.();
+    },
   });
 
   const commentMutation = useMutation({
     mutationFn: (content: string) =>
       api.post(`/api/posts/${post._id}/comments`, { content }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      invalidateAll();
       setCommentText('');
     },
   });
@@ -78,11 +86,10 @@ export default function PostCard({ post, onDelete }: Props) {
           <time className="text-muted" title={new Date(post.createdAt).toLocaleString()}>
             {timeAgo(post.createdAt)}
           </time>
-          {isOwner && (
+          {user && user._id === post.author._id && (
             <button
               className={`btn btn-ghost btn-sm ${styles.deleteBtn}`}
               onClick={() => deleteMutation.mutate()}
-              title="Delete post"
             >
               ✕
             </button>
@@ -93,7 +100,7 @@ export default function PostCard({ post, onDelete }: Props) {
       <div className={styles.content}>
         <p>{post.content}</p>
         {post.imageUrl && (
-          <img src={post.imageUrl} alt="Post attachment" className={styles.postImage} />
+          <img src={post.imageUrl} alt="" className={styles.postImage} />
         )}
       </div>
 
@@ -101,7 +108,7 @@ export default function PostCard({ post, onDelete }: Props) {
         <button
           className={`btn btn-ghost btn-sm ${liked ? styles.liked : ''}`}
           onClick={() => user && likeMutation.mutate()}
-          disabled={!user}
+          disabled={!user || likeMutation.isPending}
         >
           ♥ {post.likes.length}
         </button>
@@ -117,24 +124,20 @@ export default function PostCard({ post, onDelete }: Props) {
         <div className={styles.comments}>
           {post.comments.map((c: any) => (
             <div key={c._id} className={styles.comment}>
-              <Link to={`/u/${c.author.username}`}>
-                <img
-                  src={c.author.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${c.author.username}`}
-                  className={styles.commentAvatar}
-                  alt={c.author.displayName}
-                />
-              </Link>
+              <img
+                src={c.author.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${c.author.username}`}
+                className={styles.commentAvatar}
+                alt={c.author.displayName}
+              />
               <div className={styles.commentBody}>
                 <span className={styles.commentAuthor}>{c.author.displayName}</span>
                 <span className={styles.commentText}>{c.content}</span>
               </div>
             </div>
           ))}
-
           {user && (
             <div className={styles.commentComposer}>
               <input
-                type="text"
                 placeholder="Write a comment..."
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
@@ -149,7 +152,7 @@ export default function PostCard({ post, onDelete }: Props) {
                 onClick={() => commentText.trim() && commentMutation.mutate(commentText.trim())}
                 disabled={!commentText.trim() || commentMutation.isPending}
               >
-                Send
+                Post
               </button>
             </div>
           )}

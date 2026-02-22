@@ -176,3 +176,37 @@
   .layout { grid-template-columns: 1fr; }
   .wall { padding-top: 1rem; }
 }
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    margin-top: 1rem;
+  }
+  .wall {
+    padding-top: 0;
+  }
+  .banner {
+    height: 140px;
+  }
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    margin-top: 1rem;
+  }
+  .wall {
+    padding-top: 0;
+  }
+  .banner {
+    height: 140px;
+  }
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+}
