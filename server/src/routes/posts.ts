@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import Post from '../models/Post';
 import User from '../models/User';
+import cache from '../utils/cache';
 import Notification from '../models/Notification';
 import mongoose from 'mongoose';
 
@@ -53,6 +54,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
     if (targetProfile && targetProfile !== req.user!._id.toString()) {
       await Notification.create({ recipient: targetProfile, sender: req.user!._id, type: 'wall_post', post: post._id });
     }
+    
     const populated = await post.populate('author', 'username displayName avatar');
     res.status(201).json({ post: populated });
   } catch (error) {
@@ -97,6 +99,7 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
     for (const id of notifyIds) {
       await Notification.create({ recipient: id, sender: req.user!._id, type: 'reply', post: post._id });
     }
+    cache.flushAll();
     res.status(201).json({ comment: post.comments[post.comments.length - 1] });
   } catch (error) {
     res.status(500).json({ error: 'Failed to add comment' });
@@ -130,6 +133,10 @@ export const publicWallRouter = Router();
 publicWallRouter.get('/', async (req: any, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
+    const cacheKey = `wall-page-${page}`;
+    const cached = cache.get(cacheKey);
+    if (cached) { res.json(cached); return; }
+
     const limit = 30;
     const skip = (page - 1) * limit;
     const posts = await Post.find({ isPublicWall: true })
@@ -139,8 +146,12 @@ publicWallRouter.get('/', async (req: any, res: Response) => {
       .populate('author', 'username displayName avatar')
       .populate('comments.author', 'username displayName avatar');
     const total = await Post.countDocuments({ isPublicWall: true });
-    res.json({ posts, page, totalPages: Math.ceil(total / limit) });
-  } catch {
+    const result = { posts: posts.map(p => p.toObject()), page, totalPages: Math.ceil(total / limit) };
+
+    cache.set(cacheKey, result);
+    res.json(result);
+  } catch (err) {
+    console.error('Wall GET error:', err);
     res.status(500).json({ error: 'Failed to fetch public wall' });
   }
 });
@@ -155,6 +166,7 @@ publicWallRouter.post('/', requireAuth, async (req: AuthRequest, res: Response) 
       isPublicWall: true,
       visibility: 'public',
     });
+    cache.flushAll();
     const populated = await post.populate('author', 'username displayName avatar');
     res.status(201).json({ post: populated });
   } catch (err) {

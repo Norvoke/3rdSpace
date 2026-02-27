@@ -38,23 +38,34 @@ export default function PostCard({ post, onDelete }: Props) {
 
   const liked = user ? post.likes.includes(user._id) : false;
 
-  // Invalidate all post-related queries regardless of which page we're on
-  const invalidateAll = () => {
+  const allPostQueries = () => {
     queryClient.invalidateQueries({ queryKey: ['feed'] });
-    queryClient.invalidateQueries({ queryKey: ['group'] });
+    queryClient.invalidateQueries({ queryKey: ['group'], exact: false });
     queryClient.invalidateQueries({ queryKey: ['public-wall'] });
-    queryClient.invalidateQueries({ queryKey: ["profile"], exact: false });
+    queryClient.invalidateQueries({ queryKey: ['profile'], exact: false });
   };
 
   const likeMutation = useMutation({
     mutationFn: () => api.post(`/api/posts/${post._id}/like`),
-    onSuccess: invalidateAll,
+    // Optimistic update — flip the like instantly
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['feed'] });
+      const previousData = queryClient.getQueriesData({ queryKey: ['feed'] });
+      return { previousData };
+    },
+    onError: (_err, _vars, context: any) => {
+      // Roll back on failure
+      context?.previousData?.forEach(([key, data]: any) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSettled: allPostQueries,
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/api/posts/${post._id}`),
     onSuccess: () => {
-      invalidateAll();
+      allPostQueries();
       onDelete?.();
     },
   });
@@ -62,10 +73,46 @@ export default function PostCard({ post, onDelete }: Props) {
   const commentMutation = useMutation({
     mutationFn: (content: string) =>
       api.post(`/api/posts/${post._id}/comments`, { content }),
-    onSuccess: () => {
-      invalidateAll();
+    // Optimistic update — show comment immediately
+    onMutate: async (content: string) => {
+      if (!user) return;
       setCommentText('');
+      setShowComments(true);
+
+      // Build a fake comment to show right away
+      const optimisticComment = {
+        _id: `temp-${Date.now()}`,
+        author: {
+          _id: user._id,
+          username: user.username,
+          displayName: user.displayName,
+          avatar: user.avatar,
+        },
+        content,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Inject it into all matching cached queries
+      const updateCache = (old: any) => {
+        if (!old) return old;
+        const updatePost = (p: any) =>
+          p._id === post._id
+            ? { ...p, comments: [...p.comments, optimisticComment] }
+            : p;
+        if (old.posts) return { ...old, posts: old.posts.map(updatePost) };
+        if (old.profile?.posts) return {
+          ...old,
+          profile: { ...old.profile, posts: old.profile.posts.map(updatePost) }
+        };
+        return old;
+      };
+
+      queryClient.setQueriesData({ queryKey: ['feed'] }, updateCache);
+      queryClient.setQueriesData({ queryKey: ['public-wall'] }, updateCache);
+      queryClient.setQueriesData({ queryKey: ['group'], exact: false }, updateCache);
+      queryClient.setQueriesData({ queryKey: ['profile'], exact: false }, updateCache);
     },
+    onSettled: allPostQueries,
   });
 
   return (
@@ -108,7 +155,7 @@ export default function PostCard({ post, onDelete }: Props) {
         <button
           className={`btn btn-ghost btn-sm ${liked ? styles.liked : ''}`}
           onClick={() => user && likeMutation.mutate()}
-          disabled={!user || likeMutation.isPending}
+          disabled={!user}
         >
           ♥ {post.likes.length}
         </button>
@@ -138,7 +185,7 @@ export default function PostCard({ post, onDelete }: Props) {
           {user && (
             <div className={styles.commentComposer}>
               <input
-                placeholder="Write a comment..."
+                placeholder="write a comment..."
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 onKeyDown={e => {
@@ -152,7 +199,7 @@ export default function PostCard({ post, onDelete }: Props) {
                 onClick={() => commentText.trim() && commentMutation.mutate(commentText.trim())}
                 disabled={!commentText.trim() || commentMutation.isPending}
               >
-                Post
+                post
               </button>
             </div>
           )}
