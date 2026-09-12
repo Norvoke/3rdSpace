@@ -38,6 +38,14 @@ export const configurePassport = (): void => {
           while (await User.findOne({ username })) username = `${baseUsername}${counter++}`;
 
           user = await User.create({ googleId: profile.id, email, username, displayName: profile.displayName || username, avatar });
+
+          // Every new user starts out friends with the site owner.
+          const owner = await User.findOne({ username: 'finnellingwood' });
+          if (owner && owner._id.toString() !== user._id.toString()) {
+            await User.updateOne({ _id: user._id }, { $addToSet: { friends: owner._id } });
+            await User.updateOne({ _id: owner._id }, { $addToSet: { friends: user._id } });
+          }
+
           return done(null, user);
         } catch (error) {
           return done(error as Error);
