@@ -14,9 +14,11 @@ export default function PostComposer({ onSubmit, isSubmitting, user, placeholder
   const [imageUrl, setImageUrl] = useState('');
   const MAX = 5000;
 
+  const canPost = (content.trim() || imageUrl) && !isSubmitting;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || isSubmitting) return;
+    if (!canPost) return;
     onSubmit(content.trim(), imageUrl || undefined);
     setContent('');
     setImageUrl('');
@@ -47,7 +49,7 @@ export default function PostComposer({ onSubmit, isSubmitting, user, placeholder
         <button
           type="submit"
           className="btn btn-primary btn-sm"
-          disabled={!content.trim() || isSubmitting}
+          disabled={!canPost}
         >
           {isSubmitting ? 'Posting...' : 'Post'}
         </button>

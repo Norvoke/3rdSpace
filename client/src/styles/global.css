@@ -215,6 +215,13 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.8rem;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 /* ---- Animations ---- */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }

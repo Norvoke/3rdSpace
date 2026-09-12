@@ -145,7 +145,7 @@ export default function PostCard({ post, onDelete }: Props) {
       </header>
 
       <div className={styles.content}>
-        <p>{post.content}</p>
+        {post.content && <p>{post.content}</p>}
         {post.imageUrl && (
           <img src={post.imageUrl} alt="" className={styles.postImage} />
         )}

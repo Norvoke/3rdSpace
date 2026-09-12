@@ -51,7 +51,8 @@ app.use(helmet({
         'https://w.soundcloud.com',
         'https://open.spotify.com',
       ],
-      'img-src': ["'self'", 'data:', 'https:'],
+      // blob: is needed for the avatar cropper's local file preview
+      'img-src': ["'self'", 'data:', 'blob:', 'https:'],
     },
   },
 }));

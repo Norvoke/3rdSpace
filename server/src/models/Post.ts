@@ -33,7 +33,11 @@ const CommentSchema = new Schema<IComment>(
 const PostSchema = new Schema<IPost>(
   {
     author:        { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content:       { type: String, required: true, maxlength: 5000 },
+    content:       {
+      type: String,
+      maxlength: 5000,
+      required: [function (this: IPost) { return !this.imageUrl; }, 'Content is required unless an image is attached'],
+    },
     imageUrl:      { type: String },
     targetProfile: { type: Schema.Types.ObjectId, ref: 'User' },
     group:         { type: Schema.Types.ObjectId, ref: 'Group' },

@@ -37,14 +37,14 @@ router.get('/feed', requireAuth, async (req: AuthRequest, res: Response) => {
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { content, imageUrl, targetProfile, group, isPublicWall, visibility } = req.body;
-    if (!content?.trim()) { res.status(400).json({ error: 'Content is required' }); return; }
+    if (!content?.trim() && !imageUrl) { res.status(400).json({ error: 'Post needs text or an image' }); return; }
     if (targetProfile) {
       const target = await User.findById(targetProfile);
       if (!target) { res.status(404).json({ error: 'Target user not found' }); return; }
     }
     const post = await Post.create({
       author: req.user!._id,
-      content: content.trim(),
+      content: content?.trim() || '',
       imageUrl,
       targetProfile: targetProfile || undefined,
       group: group || undefined,
