@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import User from '../models/User';
 import Post from '../models/Post';
+import { sanitizeCustomHTML, sanitizeCustomCSS, sanitizeSongUrl } from '../utils/sanitizeProfile';
 
 const router = Router();
 
@@ -85,10 +86,9 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
       }
     }
 
-    // Basic CSS sanitization — strip <script> tags that might appear in CSS
-    if (updates.customCSS) {
-      updates.customCSS = updates.customCSS.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-    }
+    if (updates.customHTML !== undefined) updates.customHTML = sanitizeCustomHTML(updates.customHTML);
+    if (updates.customCSS !== undefined) updates.customCSS = sanitizeCustomCSS(updates.customCSS);
+    if (updates.song !== undefined) updates.song = sanitizeSongUrl(updates.song);
 
     const user = await User.findByIdAndUpdate(
       req.user!._id,
