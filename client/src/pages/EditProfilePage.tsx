@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
+import ImageInput from '../components/ImageInput';
 import styles from './EditProfilePage.module.css';
 
 export default function EditProfilePage() {
@@ -11,6 +12,7 @@ export default function EditProfilePage() {
 
   const [form, setForm] = useState({
     displayName: '',
+    avatar: '',
     bio: '',
     location: '',
     website: '',
@@ -26,6 +28,7 @@ export default function EditProfilePage() {
     if (user) {
       setForm({
         displayName: user.displayName || '',
+        avatar: user.avatar || '',
         bio: user.bio || '',
         location: user.location || '',
         website: user.website || '',
@@ -69,6 +72,15 @@ export default function EditProfilePage() {
           {/* Basics */}
           <section className={`card ${styles.section}`}>
             <h2 className={styles.sectionTitle}>Basics</h2>
+            <div className={styles.field}>
+              <label>Profile Picture</label>
+              <ImageInput
+                value={form.avatar}
+                onChange={url => setForm(prev => ({ ...prev, avatar: url }))}
+                round
+                crop
+              />
+            </div>
             <div className={styles.field}>
               <label>Display Name</label>
               <input value={form.displayName} onChange={set('displayName')} maxLength={50} />

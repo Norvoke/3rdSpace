@@ -74,7 +74,7 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
   try {
     const allowedFields = [
       'displayName', 'bio', 'location', 'website',
-      'song', 'customCSS', 'customHTML', 'headerImage',
+      'song', 'customCSS', 'customHTML', 'headerImage', 'avatar',
       'mood', 'interests', 'isPrivate',
     ];
 

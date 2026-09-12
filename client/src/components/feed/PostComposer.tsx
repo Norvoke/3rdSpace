@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import ImageInput from '../ImageInput';
 import styles from './PostComposer.module.css';
 
 interface Props {
-  onSubmit: (content: string) => void;
+  onSubmit: (content: string, imageUrl?: string) => void;
   isSubmitting: boolean;
   user: any;
   placeholder?: string;
@@ -10,13 +11,15 @@ interface Props {
 
 export default function PostComposer({ onSubmit, isSubmitting, user, placeholder }: Props) {
   const [content, setContent] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const MAX = 5000;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() || isSubmitting) return;
-    onSubmit(content.trim());
+    onSubmit(content.trim(), imageUrl || undefined);
     setContent('');
+    setImageUrl('');
   };
 
   return (
@@ -36,6 +39,7 @@ export default function PostComposer({ onSubmit, isSubmitting, user, placeholder
           maxLength={MAX}
         />
       </div>
+      <ImageInput value={imageUrl} onChange={setImageUrl} />
       <div className={styles.bottom}>
         <span className={`text-muted ${content.length > MAX * 0.9 ? styles.warn : ''}`}>
           {content.length} / {MAX}

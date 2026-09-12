@@ -17,8 +17,8 @@ export default function FeedPage() {
   });
 
   const createPost = useMutation({
-    mutationFn: (content: string) =>
-      api.post('/api/posts', { content, visibility: 'friends' }),
+    mutationFn: ({ content, imageUrl }: { content: string; imageUrl?: string }) =>
+      api.post('/api/posts', { content, imageUrl, visibility: 'friends' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
@@ -29,7 +29,7 @@ export default function FeedPage() {
       <div className={styles.layout}>
         <div className={styles.main}>
           <PostComposer
-            onSubmit={content => createPost.mutate(content)}
+            onSubmit={(content, imageUrl) => createPost.mutate({ content, imageUrl })}
             isSubmitting={createPost.isPending}
             user={user}
           />

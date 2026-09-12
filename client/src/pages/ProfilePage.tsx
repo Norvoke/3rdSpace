@@ -28,9 +28,10 @@ export default function ProfilePage() {
   });
 
   const wallPost = useMutation({
-    mutationFn: (content: string) =>
+    mutationFn: ({ content, imageUrl }: { content: string; imageUrl?: string }) =>
       api.post('/api/posts', {
         content,
+        imageUrl,
         targetProfile: data?.user?._id,
         visibility: 'public',
       }),
@@ -179,7 +180,7 @@ export default function ProfilePage() {
 
             {(me && (isFriend || isOwner)) && (
               <PostComposer
-                onSubmit={content => wallPost.mutate(content)}
+                onSubmit={(content, imageUrl) => wallPost.mutate({ content, imageUrl })}
                 isSubmitting={wallPost.isPending}
                 user={me}
                 placeholder={isOwner ? "Post to your wall..." : `Write on ${user.displayName}'s wall...`}

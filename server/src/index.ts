@@ -13,6 +13,8 @@ import friendRoutes from './routes/friends';
 import groupRoutes from './routes/groups';
 import { publicWallRouter } from './routes/posts';
 import notificationRoutes from './routes/notifications';
+import uploadRoutes from './routes/upload';
+import { uploadsDir } from './utils/uploadsDir';
 
 dotenv.config();
 
@@ -57,6 +59,8 @@ app.use('/api/friends', friendRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/wall', publicWallRouter);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/uploads', express.static(uploadsDir));
 
 // Health check
 app.get('/health', (_req, res) => {
