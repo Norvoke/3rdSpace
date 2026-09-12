@@ -157,7 +157,7 @@ export default function ProfilePage() {
               <div className={`card ${styles.friendsCard}`}>
                 <h3 className={styles.sectionTitle}>Friends</h3>
                 <div className={styles.friendsGrid}>
-                  {user.friends.slice(0, 9).map((f: any) => (
+                  {user.friends.map((f: any) => (
                     <a key={f._id} href={`/u/${f.username}`} title={f.displayName}>
                       <img
                         src={f.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${f.username}`}
