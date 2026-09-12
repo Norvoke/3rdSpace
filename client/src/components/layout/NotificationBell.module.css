@@ -57,6 +57,19 @@
   z-index: 200;
 }
 
+/* On mobile the bell isn't flush with the screen edge (avatar/hamburger sit
+   further right), so a bell-anchored 320px panel runs off the left edge.
+   Anchor to the viewport instead. */
+@media (max-width: 640px) {
+  .dropdown {
+    position: fixed;
+    top: 64px;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
+}
+
 .header {
   display: flex;
   align-items: center;

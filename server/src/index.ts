@@ -3,6 +3,7 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import dotenv from 'dotenv';
+import path from 'path';
 import { connectDB } from './config/database';
 import { configurePassport } from './config/passport';
 import authRoutes from './routes/auth';
@@ -12,7 +13,6 @@ import friendRoutes from './routes/friends';
 import groupRoutes from './routes/groups';
 import { publicWallRouter } from './routes/posts';
 import notificationRoutes from './routes/notifications';
-import MongoStore from 'connect-mongo';
 
 dotenv.config();
 
@@ -34,17 +34,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// In-memory store is fine here — session only holds transient OAuth state,
+// never real auth (that's the JWT bearer token, checked in requireAuth).
 app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback_secret',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI!,
-    ttl: 24 * 60 * 60, // 1 day in seconds
-  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 10 * 60 * 1000, // just needs to outlive the OAuth redirect round-trip
   },
 }));
 
@@ -64,9 +62,6 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: '3rdSpace API is running' });
 });
-
-import path from 'path';
-
 
 // Serve React app — always, not just in production
 const clientBuild = path.join(__dirname, '../../client/dist');
