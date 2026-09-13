@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import api from '../utils/api';
 import AvatarCropper from './AvatarCropper';
 import styles from './ImageInput.module.css';
@@ -10,7 +10,14 @@ interface Props {
   crop?: boolean;
 }
 
-export default function ImageInput({ value, onChange, round, crop }: Props) {
+export interface ImageInputHandle {
+  receiveFile: (file: File) => void;
+}
+
+const ImageInput = forwardRef<ImageInputHandle, Props>(function ImageInput(
+  { value, onChange, round, crop },
+  ref
+) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -31,15 +38,25 @@ export default function ImageInput({ value, onChange, round, crop }: Props) {
     }
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
+  const receiveFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setError('That file is not an image.');
+      return;
+    }
     if (crop) {
       setPendingImage(URL.createObjectURL(file));
     } else {
       uploadFile(file, file.name);
     }
+  };
+
+  useImperativeHandle(ref, () => ({ receiveFile }));
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    receiveFile(file);
   };
 
   const closeCropper = () => {
@@ -91,4 +108,6 @@ export default function ImageInput({ value, onChange, round, crop }: Props) {
       )}
     </div>
   );
-}
+});
+
+export default ImageInput;

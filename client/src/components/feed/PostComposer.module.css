@@ -1,4 +1,16 @@
-.composer { display: flex; flex-direction: column; gap: 0.75rem; }
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  outline: 2px dashed transparent;
+  outline-offset: -2px;
+  transition: outline-color 0.15s, background 0.15s;
+}
+
+.dragActive {
+  outline-color: var(--accent-light);
+  background: rgba(47, 125, 214, 0.06);
+}
 
 .top {
   display: flex;

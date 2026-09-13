@@ -144,6 +144,7 @@ router.post('/:postId/like', requireAuth, async (req: AuthRequest, res: Response
       post.likes.push(userId);
     }
     await post.save();
+    cache.flushAll();
     res.json({ liked: !alreadyLiked, likeCount: post.likes.length });
   } catch (error) {
     res.status(500).json({ error: 'Failed to toggle like' });

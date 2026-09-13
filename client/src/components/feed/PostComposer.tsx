@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import ImageInput from '../ImageInput';
+import { useRef, useState } from 'react';
+import ImageInput, { type ImageInputHandle } from '../ImageInput';
 import styles from './PostComposer.module.css';
 
 interface Props {
@@ -12,7 +12,16 @@ interface Props {
 export default function PostComposer({ onSubmit, isSubmitting, user, placeholder }: Props) {
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const imageInputRef = useRef<ImageInputHandle>(null);
   const MAX = 5000;
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) imageInputRef.current?.receiveFile(file);
+  };
 
   const canPost = (content.trim() || imageUrl) && !isSubmitting;
 
@@ -25,7 +34,13 @@ export default function PostComposer({ onSubmit, isSubmitting, user, placeholder
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`card ${styles.composer}`}>
+    <form
+      onSubmit={handleSubmit}
+      className={`card ${styles.composer} ${dragActive ? styles.dragActive : ''}`}
+      onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+      onDragLeave={() => setDragActive(false)}
+      onDrop={handleDrop}
+    >
       <div className={styles.top}>
         <img
           src={user?.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${user?.username || 'anon'}`}
@@ -41,7 +56,7 @@ export default function PostComposer({ onSubmit, isSubmitting, user, placeholder
           maxLength={MAX}
         />
       </div>
-      <ImageInput value={imageUrl} onChange={setImageUrl} />
+      <ImageInput ref={imageInputRef} value={imageUrl} onChange={setImageUrl} />
       <div className={styles.bottom}>
         <span className={`text-muted ${content.length > MAX * 0.9 ? styles.warn : ''}`}>
           {content.length} / {MAX}

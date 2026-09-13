@@ -22,6 +22,20 @@ interface Props {
   highlightCommentId?: string;
 }
 
+// Applies `updatePost` to the matching post inside whichever shape a cached
+// query holds it in — a list (feed/wall/group) or a single post (profile
+// wall / post detail) — used by both the like and comment optimistic updates.
+function updatePostInCache(postId: string, updatePost: (p: any) => any) {
+  return (old: any) => {
+    if (!old) return old;
+    const apply = (p: any) => (p._id === postId ? updatePost(p) : p);
+    if (old.posts) return { ...old, posts: old.posts.map(apply) };
+    if (old.profile?.posts) return { ...old, profile: { ...old.profile, posts: old.profile.posts.map(apply) } };
+    if (old.post) return { ...old, post: apply(old.post) };
+    return old;
+  };
+}
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -62,14 +76,28 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
     queryClient.invalidateQueries({ queryKey: ['group'], exact: false });
     queryClient.invalidateQueries({ queryKey: ['public-wall'] });
     queryClient.invalidateQueries({ queryKey: ['profile'], exact: false });
+    queryClient.invalidateQueries({ queryKey: ['post', post._id] });
   };
+
+  const postQueryKeys = [['feed'], ['group'], ['public-wall'], ['profile'], ['post', post._id]] as const;
 
   const likeMutation = useMutation({
     mutationFn: () => api.post(`/api/posts/${post._id}/like`),
     // Optimistic update — flip the like instantly
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['feed'] });
-      const previousData = queryClient.getQueriesData({ queryKey: ['feed'] });
+      if (!user) return;
+      await Promise.all(postQueryKeys.map(key => queryClient.cancelQueries({ queryKey: key, exact: false })));
+      const previousData = postQueryKeys.flatMap(key => queryClient.getQueriesData({ queryKey: key, exact: false }));
+
+      const toggleLike = (p: any) => ({
+        ...p,
+        likes: liked ? p.likes.filter((id: string) => id !== user._id) : [...p.likes, user._id],
+      });
+      const updateCache = updatePostInCache(post._id, toggleLike);
+      for (const key of postQueryKeys) {
+        queryClient.setQueriesData({ queryKey: key, exact: false }, updateCache);
+      }
+
       return { previousData };
     },
     onError: (_err, _vars, context: any) => {
@@ -112,24 +140,14 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
       };
 
       // Inject it into all matching cached queries
-      const updateCache = (old: any) => {
-        if (!old) return old;
-        const updatePost = (p: any) =>
-          p._id === post._id
-            ? { ...p, comments: [...p.comments, optimisticComment] }
-            : p;
-        if (old.posts) return { ...old, posts: old.posts.map(updatePost) };
-        if (old.profile?.posts) return {
-          ...old,
-          profile: { ...old.profile, posts: old.profile.posts.map(updatePost) }
-        };
-        return old;
-      };
+      const updateCache = updatePostInCache(post._id, (p: any) => ({
+        ...p,
+        comments: [...p.comments, optimisticComment],
+      }));
 
-      queryClient.setQueriesData({ queryKey: ['feed'] }, updateCache);
-      queryClient.setQueriesData({ queryKey: ['public-wall'] }, updateCache);
-      queryClient.setQueriesData({ queryKey: ['group'], exact: false }, updateCache);
-      queryClient.setQueriesData({ queryKey: ['profile'], exact: false }, updateCache);
+      for (const key of postQueryKeys) {
+        queryClient.setQueriesData({ queryKey: key, exact: false }, updateCache);
+      }
     },
     onSettled: allPostQueries,
   });
