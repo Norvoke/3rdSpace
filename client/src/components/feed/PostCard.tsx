@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
@@ -36,7 +37,17 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(!!highlightCommentId);
   const [commentText, setCommentText] = useState('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const highlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [lightboxOpen]);
 
   useEffect(() => {
     if (highlightCommentId && highlightRef.current) {
@@ -155,9 +166,33 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
       <div className={styles.content}>
         {post.content && <p>{post.content}</p>}
         {post.imageUrl && (
-          <img src={post.imageUrl} alt="" className={styles.postImage} />
+          <img
+            src={post.imageUrl}
+            alt=""
+            className={styles.postImage}
+            onClick={() => setLightboxOpen(true)}
+          />
         )}
       </div>
+
+      {lightboxOpen && post.imageUrl && createPortal(
+        <div className={styles.lightboxOverlay} onClick={() => setLightboxOpen(false)}>
+          <button
+            className={styles.lightboxClose}
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close image preview"
+          >
+            ✕
+          </button>
+          <img
+            src={post.imageUrl}
+            alt=""
+            className={styles.lightboxImage}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>,
+        document.body
+      )}
 
       <footer className={styles.footer}>
         <button
