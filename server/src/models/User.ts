@@ -9,7 +9,6 @@ export interface IUser extends Document {
   bio?: string;
   location?: string;
   website?: string;
-  song?: string;           // MySpace signature: profile song URL
   customCSS?: string;      // Let users style their own profile
   customHTML?: string;     // Profile "About Me" raw HTML block
   headerImage?: string;
@@ -41,7 +40,6 @@ const UserSchema = new Schema<IUser>(
     bio: { type: String, maxlength: 500 },
     location: { type: String, maxlength: 100 },
     website: { type: String, maxlength: 200 },
-    song: { type: String },             // Embed URL (SoundCloud, YouTube, etc.)
     customCSS: { type: String, maxlength: 10000 },
     customHTML: { type: String, maxlength: 20000 },
     headerImage: { type: String },

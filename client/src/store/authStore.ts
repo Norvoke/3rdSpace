@@ -10,7 +10,6 @@ export interface User {
   bio?: string;
   location?: string;
   website?: string;
-  song?: string;
   customCSS?: string;
   customHTML?: string;
   headerImage?: string;

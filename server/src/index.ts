@@ -40,7 +40,6 @@ app.use(cors({
 // script-src 'self' means even a <script> that slips past sanitize-html
 // (bug, bypass, future regression) in customHTML still won't execute.
 // style-src needs 'unsafe-inline' — that's the customCSS feature itself.
-// frame-src matches sanitizeSongUrl's allowlist.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -48,13 +47,6 @@ app.use(helmet({
       'script-src': ["'self'"],
       'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       'font-src': ["'self'", 'https://fonts.gstatic.com'],
-      'frame-src': [
-        "'self'",
-        'https://www.youtube.com',
-        'https://www.youtube-nocookie.com',
-        'https://w.soundcloud.com',
-        'https://open.spotify.com',
-      ],
       // blob: is needed for the avatar cropper's local file preview
       'img-src': ["'self'", 'data:', 'blob:', 'https:'],
     },

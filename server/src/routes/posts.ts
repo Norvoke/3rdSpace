@@ -91,7 +91,12 @@ router.delete('/:postId', requireAuth, async (req: AuthRequest, res: Response) =
   try {
     const post = await Post.findById(req.params.postId);
     if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
-    if (post.author.toString() !== req.user!._id.toString()) { res.status(403).json({ error: 'Not authorized' }); return; }
+    const userId = req.user!._id.toString();
+    // The post's author can always delete it; the wall owner can also
+    // delete anything posted on their own wall, even by someone else.
+    const isAuthor = post.author.toString() === userId;
+    const isWallOwner = post.targetProfile?.toString() === userId;
+    if (!isAuthor && !isWallOwner) { res.status(403).json({ error: 'Not authorized' }); return; }
     await post.deleteOne();
     res.json({ message: 'Post deleted' });
   } catch (error) {

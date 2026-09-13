@@ -6,22 +6,6 @@ import PostCard from '../components/feed/PostCard';
 import PostComposer from '../components/feed/PostComposer';
 import styles from './ProfilePage.module.css';
 
-const ALLOWED_SONG_HOSTS = new Set([
-  'youtube.com', 'www.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com',
-  'soundcloud.com', 'w.soundcloud.com',
-  'open.spotify.com',
-]);
-
-function isSafeSongUrl(url?: string): boolean {
-  if (!url) return false;
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'https:' && ALLOWED_SONG_HOSTS.has(parsed.hostname);
-  } catch {
-    return false;
-  }
-}
-
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user: me } = useAuthStore();
@@ -178,20 +162,6 @@ export default function ProfilePage() {
                 className={`card ${styles.aboutMe}`}
                 dangerouslySetInnerHTML={{ __html: user.customHTML }}
               />
-            )}
-
-            {isSafeSongUrl(user.song) && (
-              <div className={`card ${styles.songCard}`}>
-                <h3 className={styles.sectionTitle}>🎵 Profile Song</h3>
-                <iframe
-                  src={user.song}
-                  width="100%"
-                  height="80"
-                  frameBorder="0"
-                  allow="autoplay"
-                  title="Profile song"
-                />
-              </div>
             )}
 
             {(me && (isFriend || isOwner)) && (

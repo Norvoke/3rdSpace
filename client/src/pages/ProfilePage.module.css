@@ -154,11 +154,6 @@
   font-family: var(--font-body);
 }
 
-.songCard iframe {
-  margin-top: 0.5rem;
-  border-radius: var(--radius);
-}
-
 .private {
   text-align: center;
   padding: 4rem;

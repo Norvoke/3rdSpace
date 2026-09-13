@@ -9,6 +9,7 @@ import styles from './PostCard.module.css';
 interface Post {
   _id: string;
   author: { _id: string; username: string; displayName: string; avatar?: string };
+  targetProfile?: string;
   content: string;
   imageUrl?: string;
   likes: string[];
@@ -170,7 +171,7 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
           <time className="text-muted" title={new Date(post.createdAt).toLocaleString()}>
             {timeAgo(post.createdAt)}
           </time>
-          {user && user._id === post.author._id && (
+          {user && (user._id === post.author._id || user._id === post.targetProfile) && (
             <button
               className={`btn btn-ghost btn-sm ${styles.deleteBtn}`}
               onClick={() => deleteMutation.mutate()}

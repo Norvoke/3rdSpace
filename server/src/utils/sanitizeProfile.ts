@@ -1,11 +1,5 @@
 import sanitizeHtml from 'sanitize-html';
 
-const SONG_HOSTS = new Set([
-  'youtube.com', 'www.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com',
-  'soundcloud.com', 'w.soundcloud.com',
-  'open.spotify.com',
-]);
-
 // Same denylist sanitizeCustomCSS applies, run again over the final HTML so
 // it also covers anything smuggled into a `style="..."` attribute value —
 // sanitize-html allowlists the *attribute name* but doesn't parse CSS inside it.
@@ -56,17 +50,6 @@ export function sanitizeCustomCSS(css: string): string {
   );
 }
 
-export function sanitizeSongUrl(url: string | undefined): string | undefined {
-  if (!url) return undefined;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === 'https:' && SONG_HOSTS.has(parsed.hostname)) return url;
-  } catch {
-    // fall through
-  }
-  return undefined;
-}
-
 // ponytail: self-check for the sanitizers' branches — `npx ts-node src/utils/sanitizeProfile.ts`
 if (require.main === module) {
   const html = sanitizeCustomHTML('<script>alert(1)</script><img src=x onerror=alert(1)><a href="javascript:alert(1)">click</a><img src="data:image/png;base64,abc">');
@@ -84,9 +67,6 @@ if (require.main === module) {
   const css = sanitizeCustomCSS('body{color:red} @import url(evil.css); .x{behavior:url(evil.htc)}');
   console.assert(!css.includes('@import'), '@import should be stripped');
   console.assert(!css.includes('behavior:'), 'behavior: should be stripped');
-
-  console.assert(sanitizeSongUrl('https://evil.com/phish') === undefined, 'non-allowlisted host should be rejected');
-  console.assert(sanitizeSongUrl('https://w.soundcloud.com/player/?url=x') !== undefined, 'allowlisted host should pass');
 
   console.log('sanitizeProfile self-check passed');
 }

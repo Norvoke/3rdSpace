@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import User from '../models/User';
 import Post from '../models/Post';
-import { sanitizeCustomHTML, sanitizeCustomCSS, sanitizeSongUrl } from '../utils/sanitizeProfile';
+import { sanitizeCustomHTML, sanitizeCustomCSS } from '../utils/sanitizeProfile';
 
 const router = Router();
 
@@ -75,7 +75,7 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
   try {
     const allowedFields = [
       'displayName', 'bio', 'location', 'website',
-      'song', 'customCSS', 'customHTML', 'headerImage', 'avatar',
+      'customCSS', 'customHTML', 'headerImage', 'avatar',
       'mood', 'interests', 'isPrivate',
     ];
 
@@ -88,7 +88,6 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
 
     if (updates.customHTML !== undefined) updates.customHTML = sanitizeCustomHTML(updates.customHTML);
     if (updates.customCSS !== undefined) updates.customCSS = sanitizeCustomCSS(updates.customCSS);
-    if (updates.song !== undefined) updates.song = sanitizeSongUrl(updates.song);
 
     const user = await User.findByIdAndUpdate(
       req.user!._id,

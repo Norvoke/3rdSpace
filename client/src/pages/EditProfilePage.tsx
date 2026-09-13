@@ -17,7 +17,6 @@ export default function EditProfilePage() {
     location: '',
     website: '',
     mood: '',
-    song: '',
     customCSS: '',
     customHTML: '',
     interests: '',
@@ -33,7 +32,6 @@ export default function EditProfilePage() {
         location: user.location || '',
         website: user.website || '',
         mood: user.mood || '',
-        song: user.song || '',
         customCSS: user.customCSS || '',
         customHTML: user.customHTML || '',
         interests: (user.interests || []).join(', '),
@@ -116,22 +114,6 @@ export default function EditProfilePage() {
               />
               Private profile (only friends can see your full profile)
             </label>
-          </section>
-
-          {/* Music */}
-          <section className={`card ${styles.section}`}>
-            <h2 className={styles.sectionTitle}>🎵 Profile Song</h2>
-            <p className="text-muted" style={{ marginBottom: '0.75rem' }}>
-              Paste a SoundCloud or YouTube embed URL to auto-play on your profile.
-            </p>
-            <div className={styles.field}>
-              <label>Song Embed URL</label>
-              <input
-                value={form.song}
-                onChange={set('song')}
-                placeholder="https://w.soundcloud.com/player/?url=..."
-              />
-            </div>
           </section>
 
           {/* Custom HTML */}
