@@ -15,19 +15,20 @@ router.get('/feed', requireAuth, async (req: AuthRequest, res: Response) => {
     const skip = (page - 1) * limit;
     const currentUser = await User.findById(req.user!._id);
     const friendIds = currentUser?.friends || [];
-    const posts = await Post.find({
+    const feedFilter = {
       $or: [
         { author: { $in: [...friendIds, req.user!._id] }, visibility: { $in: ['public', 'friends'] } },
         { author: req.user!._id },
       ],
       targetProfile: { $exists: false },
-    })
+    };
+    const posts = await Post.find(feedFilter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate('author', 'username displayName avatar')
       .populate('comments.author', 'username displayName avatar');
-    const total = await Post.countDocuments({ author: { $in: [...friendIds, req.user!._id] } });
+    const total = await Post.countDocuments(feedFilter);
     res.json({ posts, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch feed' });

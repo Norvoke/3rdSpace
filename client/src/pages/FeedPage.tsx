@@ -36,19 +36,25 @@ export default function FeedPage() {
 
           {isLoading ? (
             <div className={styles.loading}>Loading feed...</div>
-          ) : data?.posts?.length === 0 ? (
+          ) : data?.posts?.length === 0 && page === 1 ? (
             <div className={styles.empty}>
               <p>Your feed is empty. Add some friends to see their posts here!</p>
             </div>
           ) : (
             <>
-              {data?.posts?.map((post: any) => (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  onDelete={() => queryClient.invalidateQueries({ queryKey: ['feed'] })}
-                />
-              ))}
+              {data?.posts?.length === 0 ? (
+                <div className={styles.empty}>
+                  <p>No more posts.</p>
+                </div>
+              ) : (
+                data?.posts?.map((post: any) => (
+                  <PostCard
+                    key={post._id}
+                    post={post}
+                    onDelete={() => queryClient.invalidateQueries({ queryKey: ['feed'] })}
+                  />
+                ))
+              )}
 
               {data?.totalPages > 1 && (
                 <div className={styles.pagination}>
