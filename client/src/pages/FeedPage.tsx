@@ -54,16 +54,16 @@ export default function FeedPage() {
                 <div className={styles.pagination}>
                   <button
                     className="btn btn-ghost btn-sm"
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={page >= data.totalPages}
                   >
                     ← Older
                   </button>
                   <span className="text-muted">{page} / {data.totalPages}</span>
                   <button
                     className="btn btn-ghost btn-sm"
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={page >= data.totalPages}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
                   >
                     Newer →
                   </button>
