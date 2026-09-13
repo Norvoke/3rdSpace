@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import session from 'express-session';
+import createMemoryStore from 'memorystore';
 import passport from 'passport';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -17,7 +18,9 @@ import notificationRoutes from './routes/notifications';
 import uploadRoutes from './routes/upload';
 import { uploadsDir } from './utils/uploadsDir';
 
-dotenv.config();
+// Resolve relative to this file, not process.cwd() — that way `npm start`
+// works the same whether it's launched from the repo root or from server/.
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -61,12 +64,17 @@ app.use(helmet({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// In-memory store is fine here — session only holds transient OAuth state,
-// never real auth (that's the JWT bearer token, checked in requireAuth).
+// Session only holds transient OAuth state, never real auth (that's the JWT
+// bearer token, checked in requireAuth) — so a full Mongo-backed store would
+// be overkill. Express-session's built-in MemoryStore never prunes expired
+// entries though (a real leak, not just a noisy warning), so this swaps in
+// the pruning variant instead of a database-backed one.
+const MemoryStore = createMemoryStore(session);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback_secret',
   resave: false,
   saveUninitialized: false,
+  store: new MemoryStore({ checkPeriod: 10 * 60 * 1000 }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     maxAge: 10 * 60 * 1000, // just needs to outlive the OAuth redirect round-trip

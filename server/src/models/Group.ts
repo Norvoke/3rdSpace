@@ -22,7 +22,6 @@ const GroupSchema = new Schema<IGroup>(
   { timestamps: true }
 );
 
-GroupSchema.index({ slug: 1 });
 GroupSchema.index({ name: 'text', description: 'text' });
 
 export default mongoose.model<IGroup>('Group', GroupSchema);
