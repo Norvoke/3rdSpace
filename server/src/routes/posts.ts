@@ -34,6 +34,31 @@ router.get('/feed', requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// Must stay below the literal '/feed' route above — '/:postId' would
+// otherwise match the string "feed" as a post id and shadow it.
+router.get('/:postId', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const post = await Post.findById(req.params.postId)
+      .populate('author', 'username displayName avatar')
+      .populate('comments.author', 'username displayName avatar');
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
+
+    const viewerId = req.user?._id?.toString();
+    const isOwner = viewerId === post.author._id.toString();
+    if (!isOwner) {
+      if (post.visibility === 'private') { res.status(403).json({ error: 'This post is private' }); return; }
+      if (post.visibility === 'friends') {
+        const author = await User.findById(post.author._id).select('friends');
+        const isFriend = viewerId && author?.friends.some(id => id.toString() === viewerId);
+        if (!isFriend) { res.status(403).json({ error: 'This post is friends-only' }); return; }
+      }
+    }
+    res.json({ post });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch post' });
+  }
+});
+
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { content, imageUrl, targetProfile, group, isPublicWall, visibility } = req.body;
@@ -78,18 +103,19 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
   try {
     const { content } = req.body;
     if (!content?.trim()) { res.status(400).json({ error: 'Comment content required' }); return; }
+    const commentId = new mongoose.Types.ObjectId();
     const post = await Post.findByIdAndUpdate(
       req.params.postId,
-      { $push: { comments: { _id: new mongoose.Types.ObjectId(), author: req.user!._id, content: content.trim(), createdAt: new Date() } } },
+      { $push: { comments: { _id: commentId, author: req.user!._id, content: content.trim(), createdAt: new Date() } } },
       { new: true }
     ).populate('comments.author', 'username displayName avatar');
     if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
     const senderId = req.user!._id.toString();
     if (post.author.toString() !== senderId) {
-      await Notification.create({ recipient: post.author, sender: req.user!._id, type: 'comment', post: post._id });
+      await Notification.create({ recipient: post.author, sender: req.user!._id, type: 'comment', post: post._id, comment: commentId });
     }
     if (post.targetProfile && post.targetProfile.toString() !== senderId && post.targetProfile.toString() !== post.author.toString()) {
-      await Notification.create({ recipient: post.targetProfile, sender: req.user!._id, type: 'reply', post: post._id });
+      await Notification.create({ recipient: post.targetProfile, sender: req.user!._id, type: 'reply', post: post._id, comment: commentId });
     }
     const notifyIds = new Set<string>();
     for (const c of post.comments.slice(0, -1)) {
@@ -97,7 +123,7 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
       if (authorId !== senderId && authorId !== post.author.toString()) notifyIds.add(authorId);
     }
     for (const id of notifyIds) {
-      await Notification.create({ recipient: id, sender: req.user!._id, type: 'reply', post: post._id });
+      await Notification.create({ recipient: id, sender: req.user!._id, type: 'reply', post: post._id, comment: commentId });
     }
     cache.flushAll();
     res.status(201).json({ comment: post.comments[post.comments.length - 1] });

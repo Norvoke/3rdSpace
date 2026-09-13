@@ -12,6 +12,7 @@ import SearchPage from './pages/SearchPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
 import WallPage from './pages/WallPage';
+import PostDetailPage from './pages/PostDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="edit-profile" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
         <Route path="search" element={<SearchPage />} />
         <Route path="wall" element={<WallPage />} />
+        <Route path="post/:postId" element={<PostDetailPage />} />
         <Route path="groups" element={<GroupsPage />} />
         <Route path="groups/:slug" element={<GroupPage />} />
         <Route path="u/:username" element={<ProfilePage />} />

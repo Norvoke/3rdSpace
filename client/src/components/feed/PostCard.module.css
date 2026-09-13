@@ -110,6 +110,12 @@
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
+  border-radius: var(--radius);
+  transition: background 0.6s ease;
+}
+
+.commentHighlight {
+  background: rgba(47, 125, 214, 0.12);
 }
 
 .commentAvatar {
@@ -136,6 +142,14 @@
   margin-right: 0.4rem;
   font-family: var(--font-ui);
   color: var(--text-secondary);
+}
+
+.commentTime {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  margin-top: 0.2rem;
 }
 
 .commentText {

@@ -9,8 +9,16 @@ interface Notification {
   type: 'friend_request' | 'friend_accepted' | 'wall_post' | 'comment' | 'reply';
   sender: { username: string; displayName: string; avatar?: string };
   post?: { _id: string };
+  comment?: string;
   read: boolean;
   createdAt: string;
+}
+
+function notificationLink(n: Notification): string {
+  if (n.post) {
+    return `/post/${n.post._id}${n.comment ? `?comment=${n.comment}` : ''}`;
+  }
+  return `/u/${n.sender.username}`;
 }
 
 function notificationText(n: Notification): string {
@@ -90,7 +98,7 @@ export default function NotificationBell() {
               {notifications.map(n => (
                 <Link
                   key={n._id}
-                  to={`/u/${n.sender.username}`}
+                  to={notificationLink(n)}
                   className={`${styles.item} ${!n.read ? styles.unread : ''}`}
                   onClick={() => setOpen(false)}
                 >

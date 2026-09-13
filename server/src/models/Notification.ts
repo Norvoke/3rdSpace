@@ -12,6 +12,7 @@ export interface INotification extends Document {
   sender: mongoose.Types.ObjectId;
   type: NotificationType;
   post?: mongoose.Types.ObjectId;
+  comment?: mongoose.Types.ObjectId;
   read: boolean;
   createdAt: Date;
 }
@@ -22,6 +23,9 @@ const NotificationSchema = new Schema<INotification>(
     sender:    { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type:      { type: String, enum: ['friend_request', 'friend_accepted', 'wall_post', 'comment', 'reply'], required: true },
     post:      { type: Schema.Types.ObjectId, ref: 'Post' },
+    // The specific comment (an embedded Post.comments._id) this notification
+    // is about — lets the client scroll straight to it, not just the post.
+    comment:   { type: Schema.Types.ObjectId },
     read:      { type: Boolean, default: false },
   },
   { timestamps: true }

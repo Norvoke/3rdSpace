@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
@@ -18,6 +18,7 @@ interface Post {
 interface Props {
   post: Post;
   onDelete?: () => void;
+  highlightCommentId?: string;
 }
 
 function timeAgo(dateStr: string): string {
@@ -30,11 +31,18 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function PostCard({ post, onDelete }: Props) {
+export default function PostCard({ post, onDelete, highlightCommentId }: Props) {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(!!highlightCommentId);
   const [commentText, setCommentText] = useState('');
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (highlightCommentId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightCommentId]);
 
   const liked = user ? post.likes.includes(user._id) : false;
 
@@ -170,7 +178,11 @@ export default function PostCard({ post, onDelete }: Props) {
       {showComments && (
         <div className={styles.comments}>
           {post.comments.map((c: any) => (
-            <div key={c._id} className={styles.comment}>
+            <div
+              key={c._id}
+              ref={c._id === highlightCommentId ? highlightRef : undefined}
+              className={`${styles.comment} ${c._id === highlightCommentId ? styles.commentHighlight : ''}`}
+            >
               <img
                 src={c.author.avatar || `https://api.dicebear.com/8.x/identicon/svg?seed=${c.author.username}`}
                 className={styles.commentAvatar}
@@ -179,6 +191,9 @@ export default function PostCard({ post, onDelete }: Props) {
               <div className={styles.commentBody}>
                 <span className={styles.commentAuthor}>{c.author.displayName}</span>
                 <span className={styles.commentText}>{c.content}</span>
+                <time className={styles.commentTime} title={new Date(c.createdAt).toLocaleString()}>
+                  {timeAgo(c.createdAt)}
+                </time>
               </div>
             </div>
           ))}

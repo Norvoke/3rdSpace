@@ -1,0 +1,13 @@
+.wrap {
+  max-width: 640px;
+  margin: 1.5rem auto;
+}
+
+.status {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem 1rem;
+  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-style: italic;
+}
