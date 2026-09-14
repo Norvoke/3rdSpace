@@ -8,6 +8,13 @@
   gap: 1rem;
 }
 
+.deleteGroupBtn {
+  color: #c0392b !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 .title {
   font-family: var(--font-display);
   font-size: 1.8rem;

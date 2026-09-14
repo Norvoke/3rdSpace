@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import Group from '../models/Group';
 import Post from '../models/Post';
+import { SITE_ADMIN_USERNAME } from '../config/siteAdmin';
 
 const router = Router();
 
@@ -53,6 +54,21 @@ router.get('/:slug', optionalAuth, async (req: AuthRequest, res: Response) => {
     res.json({ group, posts });
   } catch {
     res.status(500).json({ error: 'Failed to fetch group' });
+  }
+});
+
+router.delete('/:slug', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const group = await Group.findOne({ slug: req.params.slug });
+    if (!group) { res.status(404).json({ error: 'Group not found' }); return; }
+    const isOwner = group.owner.toString() === req.user!._id.toString();
+    const isSiteAdmin = req.user!.username === SITE_ADMIN_USERNAME;
+    if (!isOwner && !isSiteAdmin) { res.status(403).json({ error: 'Not authorized' }); return; }
+    await Post.deleteMany({ group: group._id });
+    await group.deleteOne();
+    res.json({ message: 'Group deleted' });
+  } catch {
+    res.status(500).json({ error: 'Failed to delete group' });
   }
 });
 

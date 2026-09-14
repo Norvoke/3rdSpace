@@ -162,6 +162,19 @@
   background: rgba(47, 125, 214, 0.12);
 }
 
+.commentDelete {
+  opacity: 0;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #c0392b;
+  font-size: 0.75rem;
+  padding: 0.2rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.comment:hover .commentDelete { opacity: 1; }
+
 .commentAvatar {
   width: 28px;
   height: 28px;

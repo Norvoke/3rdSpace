@@ -5,6 +5,7 @@ import User from '../models/User';
 import cache from '../utils/cache';
 import Notification from '../models/Notification';
 import mongoose from 'mongoose';
+import { SITE_ADMIN_USERNAME } from '../config/siteAdmin';
 
 const router = Router();
 
@@ -94,14 +95,35 @@ router.delete('/:postId', requireAuth, async (req: AuthRequest, res: Response) =
     if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
     const userId = req.user!._id.toString();
     // The post's author can always delete it; the wall owner can also
-    // delete anything posted on their own wall, even by someone else.
+    // delete anything posted on their own wall, even by someone else;
+    // the site admin can delete anything, anywhere.
     const isAuthor = post.author.toString() === userId;
     const isWallOwner = post.targetProfile?.toString() === userId;
-    if (!isAuthor && !isWallOwner) { res.status(403).json({ error: 'Not authorized' }); return; }
+    const isSiteAdmin = req.user!.username === SITE_ADMIN_USERNAME;
+    if (!isAuthor && !isWallOwner && !isSiteAdmin) { res.status(403).json({ error: 'Not authorized' }); return; }
     await post.deleteOne();
+    cache.flushAll();
     res.json({ message: 'Post deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
+
+router.delete('/:postId/comments/:commentId', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
+    const comment = post.comments.find(c => c._id.toString() === req.params.commentId);
+    if (!comment) { res.status(404).json({ error: 'Comment not found' }); return; }
+    const userId = req.user!._id.toString();
+    const isCommentAuthor = comment.author.toString() === userId;
+    const isSiteAdmin = req.user!.username === SITE_ADMIN_USERNAME;
+    if (!isCommentAuthor && !isSiteAdmin) { res.status(403).json({ error: 'Not authorized' }); return; }
+    await Post.findByIdAndUpdate(post._id, { $pull: { comments: { _id: comment._id } } });
+    cache.flushAll();
+    res.json({ message: 'Comment deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete comment' });
   }
 });
 

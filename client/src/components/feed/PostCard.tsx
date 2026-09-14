@@ -153,6 +153,30 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
     onSettled: allPostQueries,
   });
 
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: string) => api.delete(`/api/posts/${post._id}/comments/${commentId}`),
+    onMutate: async (commentId: string) => {
+      await Promise.all(postQueryKeys.map(key => queryClient.cancelQueries({ queryKey: key, exact: false })));
+      const previousData = postQueryKeys.flatMap(key => queryClient.getQueriesData({ queryKey: key, exact: false }));
+
+      const updateCache = updatePostInCache(post._id, (p: any) => ({
+        ...p,
+        comments: p.comments.filter((c: any) => c._id !== commentId),
+      }));
+      for (const key of postQueryKeys) {
+        queryClient.setQueriesData({ queryKey: key, exact: false }, updateCache);
+      }
+
+      return { previousData };
+    },
+    onError: (_err, _vars, context: any) => {
+      context?.previousData?.forEach(([key, data]: any) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSettled: allPostQueries,
+  });
+
   return (
     <article className={`card ${styles.post} animate-in`}>
       <header className={styles.header}>
@@ -249,6 +273,15 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
                   {timeAgo(c.createdAt)}
                 </time>
               </div>
+              {user && (user._id === c.author._id || user.username === 'finnellingwood') && (
+                <button
+                  className={styles.commentDelete}
+                  onClick={() => deleteCommentMutation.mutate(c._id)}
+                  aria-label="Delete comment"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
           {user && (

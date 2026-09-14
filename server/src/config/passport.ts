@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/User';
+import { SITE_ADMIN_USERNAME } from './siteAdmin';
 
 export const configurePassport = (): void => {
   const clientID = process.env.GOOGLE_CLIENT_ID;
@@ -40,7 +41,7 @@ export const configurePassport = (): void => {
           user = await User.create({ googleId: profile.id, email, username, displayName: profile.displayName || username, avatar });
 
           // Every new user starts out friends with the site owner.
-          const owner = await User.findOne({ username: 'finnellingwood' });
+          const owner = await User.findOne({ username: SITE_ADMIN_USERNAME });
           if (owner && owner._id.toString() !== user._id.toString()) {
             await User.updateOne({ _id: user._id }, { $addToSet: { friends: owner._id } });
             await User.updateOne({ _id: owner._id }, { $addToSet: { friends: user._id } });

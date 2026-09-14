@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
@@ -10,6 +10,7 @@ export default function GroupPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user, isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [content, setContent] = useState('');
 
   const { data, isLoading, isError } = useQuery({
@@ -25,6 +26,14 @@ export default function GroupPage() {
   const leave = useMutation({
     mutationFn: () => api.post(`/api/groups/${slug}/leave`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['group', slug] }),
+  });
+
+  const deleteGroup = useMutation({
+    mutationFn: () => api.delete(`/api/groups/${slug}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      navigate('/groups');
+    },
   });
 
   const postToGroup = useMutation({
@@ -57,6 +66,7 @@ export default function GroupPage() {
     group.members?.some((m: any) => (m._id || m) === user._id);
   const isOwner = isAuthenticated && user &&
     (group.owner?._id || group.owner) === user._id;
+  const canDelete = isOwner || (isAuthenticated && user?.username === 'finnellingwood');
 
   return (
     <div className="container">
@@ -101,6 +111,19 @@ export default function GroupPage() {
               <Link to="/login" className="btn btn-primary btn-sm">
                 Sign in to join
               </Link>
+            )}
+            {canDelete && (
+              <button
+                className={`btn btn-ghost btn-sm ${styles.deleteGroupBtn}`}
+                onClick={() => {
+                  if (window.confirm('Delete this group and all its posts? This cannot be undone.')) {
+                    deleteGroup.mutate();
+                  }
+                }}
+                disabled={deleteGroup.isPending}
+              >
+                Delete group
+              </button>
             )}
           </div>
         </div>
