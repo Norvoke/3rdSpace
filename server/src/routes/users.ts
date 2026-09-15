@@ -62,7 +62,8 @@ router.get('/:username', optionalAuth, async (req: AuthRequest, res: Response) =
     const wallPosts = await Post.find({ targetProfile: user._id })
       .sort({ createdAt: -1 }) // ALWAYS chronological
       .limit(10)
-      .populate('author', 'username displayName avatar');
+      .populate('author', 'username displayName avatar')
+      .populate('comments.author', 'username displayName avatar');
 
     res.json({ user, wallPosts, isOwner, isFriend });
   } catch (error) {
