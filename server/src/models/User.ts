@@ -12,6 +12,9 @@ export interface IUser extends Document {
   customCSS?: string;      // Let users style their own profile
   customHTML?: string;     // Profile "About Me" raw HTML block
   headerImage?: string;
+  bannerColor?: string;         // Banner background hex color (default when unset)
+  bannerPattern?: string;       // Hero Patterns id tiled over the banner
+  bannerPatternColor?: string;  // Foreground hex color for the tiled pattern
   mood?: string;
   interests?: string[];
   friends: mongoose.Types.ObjectId[];
@@ -43,6 +46,9 @@ const UserSchema = new Schema<IUser>(
     customCSS: { type: String, maxlength: 10000 },
     customHTML: { type: String, maxlength: 20000 },
     headerImage: { type: String },
+    bannerColor: { type: String, match: /^#[0-9a-f]{6}$/i },
+    bannerPattern: { type: String, maxlength: 60 },
+    bannerPatternColor: { type: String, match: /^#[0-9a-f]{6}$/i },
     mood: { type: String, maxlength: 100 },
     interests: [{ type: String }],
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],

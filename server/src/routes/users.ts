@@ -77,6 +77,7 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
     const allowedFields = [
       'displayName', 'bio', 'location', 'website',
       'customCSS', 'customHTML', 'headerImage', 'avatar',
+      'bannerColor', 'bannerPattern', 'bannerPatternColor',
       'mood', 'interests', 'isPrivate',
     ];
 
@@ -90,9 +91,22 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
     if (updates.customHTML !== undefined) updates.customHTML = sanitizeCustomHTML(updates.customHTML);
     if (updates.customCSS !== undefined) updates.customCSS = sanitizeCustomCSS(updates.customCSS);
 
+    // Empty string means "clear it and go back to the default banner" —
+    // bannerColor's schema-level regex would otherwise reject ''.
+    const unset: Record<string, ''> = {};
+    for (const field of ['bannerColor', 'bannerPattern', 'bannerPatternColor']) {
+      if (updates[field] === '') {
+        delete updates[field];
+        unset[field] = '';
+      }
+    }
+
+    const updateOp: Record<string, any> = { $set: updates };
+    if (Object.keys(unset).length) updateOp.$unset = unset;
+
     const user = await User.findByIdAndUpdate(
       req.user!._id,
-      { $set: updates },
+      updateOp,
       { new: true, runValidators: true }
     ).select('-googleId -__v');
 

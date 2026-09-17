@@ -4,7 +4,10 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import ImageInput from '../components/ImageInput';
+import { HERO_PATTERNS, patternDataUri } from '../utils/heroPatterns';
 import styles from './EditProfilePage.module.css';
+
+const DEFAULT_BANNER_COLOR = '#5aa3ed';
 
 export default function EditProfilePage() {
   const { user, updateUser } = useAuthStore();
@@ -17,6 +20,9 @@ export default function EditProfilePage() {
     location: '',
     website: '',
     mood: '',
+    bannerColor: '',
+    bannerPattern: '',
+    bannerPatternColor: '',
     customCSS: '',
     customHTML: '',
     interests: '',
@@ -32,6 +38,9 @@ export default function EditProfilePage() {
         location: user.location || '',
         website: user.website || '',
         mood: user.mood || '',
+        bannerColor: user.bannerColor || '',
+        bannerPattern: user.bannerPattern || '',
+        bannerPatternColor: user.bannerPatternColor || '',
         customCSS: user.customCSS || '',
         customHTML: user.customHTML || '',
         interests: (user.interests || []).join(', '),
@@ -114,6 +123,73 @@ export default function EditProfilePage() {
               />
               Private profile (only friends can see your full profile)
             </label>
+          </section>
+
+          {/* Banner */}
+          <section className={`card ${styles.section}`}>
+            <h2 className={styles.sectionTitle}>Profile Banner</h2>
+            <p className="text-muted" style={{ marginBottom: '0.75rem' }}>
+              Pick a background color and, if you want, tile a pattern over it.
+              Leave it blank for the default.
+            </p>
+            <div className={styles.row}>
+              <div className={styles.field}>
+                <label>Background color</label>
+                <div className={styles.colorField}>
+                  <input
+                    type="color"
+                    value={form.bannerColor || DEFAULT_BANNER_COLOR}
+                    onChange={set('bannerColor')}
+                  />
+                  {form.bannerColor && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setForm(prev => ({ ...prev, bannerColor: '' }))}
+                    >
+                      Reset to default
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className={styles.field}>
+                <label>Pattern color</label>
+                <div className={styles.colorField}>
+                  <input
+                    type="color"
+                    value={form.bannerPatternColor || '#ffffff'}
+                    onChange={set('bannerPatternColor')}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className={styles.field}>
+              <label>Pattern</label>
+              <div className={styles.patternGrid}>
+                <button
+                  type="button"
+                  className={`${styles.patternSwatch} ${!form.bannerPattern ? styles.patternSwatchActive : ''}`}
+                  style={{ backgroundColor: form.bannerColor || DEFAULT_BANNER_COLOR }}
+                  onClick={() => setForm(prev => ({ ...prev, bannerPattern: '' }))}
+                  title="None"
+                >
+                  None
+                </button>
+                {HERO_PATTERNS.map(pattern => (
+                  <button
+                    type="button"
+                    key={pattern.id}
+                    className={`${styles.patternSwatch} ${form.bannerPattern === pattern.id ? styles.patternSwatchActive : ''}`}
+                    style={{
+                      backgroundColor: form.bannerColor || DEFAULT_BANNER_COLOR,
+                      backgroundImage: patternDataUri(pattern, form.bannerPatternColor || '#ffffff', 0.4),
+                    }}
+                    onClick={() => setForm(prev => ({ ...prev, bannerPattern: pattern.id }))}
+                    title={pattern.name}
+                  />
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* Custom HTML */}

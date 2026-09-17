@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import PostCard from '../components/feed/PostCard';
 import PostComposer from '../components/feed/PostComposer';
+import { getBannerStyle } from '../utils/heroPatterns';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
@@ -70,10 +71,7 @@ export default function ProfilePage() {
       )}
 
       {/* Banner */}
-      <div
-        className={styles.banner}
-        style={user.headerImage ? { backgroundImage: `url(${user.headerImage})` } : {}}
-      />
+      <div className={styles.banner} style={getBannerStyle(user)} />
 
       <div className="container">
         <div className={styles.layout}>

@@ -13,6 +13,9 @@ export interface User {
   customCSS?: string;
   customHTML?: string;
   headerImage?: string;
+  bannerColor?: string;
+  bannerPattern?: string;
+  bannerPatternColor?: string;
   mood?: string;
   interests?: string[];
   friends: string[];
