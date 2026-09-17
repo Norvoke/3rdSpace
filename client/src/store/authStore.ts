@@ -16,6 +16,7 @@ export interface User {
   bannerColor?: string;
   bannerPattern?: string;
   bannerPatternColor?: string;
+  bannerPatternScale?: number;
   mood?: string;
   interests?: string[];
   friends: string[];

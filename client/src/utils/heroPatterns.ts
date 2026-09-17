@@ -103,12 +103,31 @@ export function getPattern(id: string | undefined): HeroPattern | undefined {
   return HERO_PATTERNS.find(p => p.id === id);
 }
 
-/** Recolors a pattern's fill and wraps it as a CSS url("data:...") value.
- * The SVG's own width/height attributes control the tile size when used
- * with `background-repeat: repeat` -- no separate background-size needed. */
+/** Recolors a pattern's fill and wraps it as a CSS url("data:...") value. */
 export function patternDataUri(pattern: HeroPattern, fgColor: string, opacity: number): string {
   const recolored = pattern.svg.replace(/fill="#000"/g, `fill="${fgColor}" fill-opacity="${opacity}"`);
   return `url("data:image/svg+xml,${encodeURIComponent(recolored)}")`;
+}
+
+/** The SVG's own width/height attributes -- used as the base tile size before scaling. */
+export function getPatternSize(pattern: HeroPattern): { width: number; height: number } {
+  const match = pattern.svg.match(/width="([\d.]+)" height="([\d.]+)"/);
+  return match ? { width: parseFloat(match[1]), height: parseFloat(match[2]) } : { width: 80, height: 80 };
+}
+
+export const DEFAULT_PATTERN_SCALE = 1;
+const DEFAULT_PATTERN_OPACITY = 0.4;
+
+/** The background-image/size/position/repeat for a tiled, scaled pattern —
+ * used for both the real banner and the picker's swatch previews so they match. */
+export function getPatternLayerStyle(pattern: HeroPattern, fgColor: string, scale: number): CSSProperties {
+  const { width, height } = getPatternSize(pattern);
+  return {
+    backgroundImage: patternDataUri(pattern, fgColor, DEFAULT_PATTERN_OPACITY),
+    backgroundSize: `${width * scale}px ${height * scale}px`,
+    backgroundPosition: '0 0',
+    backgroundRepeat: 'repeat',
+  };
 }
 
 export interface BannerUser {
@@ -116,9 +135,8 @@ export interface BannerUser {
   bannerColor?: string;
   bannerPattern?: string;
   bannerPatternColor?: string;
+  bannerPatternScale?: number;
 }
-
-const DEFAULT_PATTERN_OPACITY = 0.4;
 
 export function getBannerStyle(user: BannerUser): CSSProperties {
   if (user.headerImage) return { backgroundImage: `url(${user.headerImage})` };
@@ -129,8 +147,11 @@ export function getBannerStyle(user: BannerUser): CSSProperties {
 
   const pattern = getPattern(user.bannerPattern);
   if (pattern) {
-    style.backgroundImage = patternDataUri(pattern, user.bannerPatternColor || '#ffffff', DEFAULT_PATTERN_OPACITY);
-    style.backgroundRepeat = 'repeat';
+    Object.assign(style, getPatternLayerStyle(
+      pattern,
+      user.bannerPatternColor || '#ffffff',
+      user.bannerPatternScale || DEFAULT_PATTERN_SCALE
+    ));
   }
   return style;
 }

@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import ImageInput from '../components/ImageInput';
-import { HERO_PATTERNS, patternDataUri } from '../utils/heroPatterns';
+import { HERO_PATTERNS, getPatternLayerStyle, DEFAULT_PATTERN_SCALE } from '../utils/heroPatterns';
 import styles from './EditProfilePage.module.css';
 
 const DEFAULT_BANNER_COLOR = '#5aa3ed';
@@ -23,6 +23,7 @@ export default function EditProfilePage() {
     bannerColor: '',
     bannerPattern: '',
     bannerPatternColor: '',
+    bannerPatternScale: DEFAULT_PATTERN_SCALE,
     customCSS: '',
     customHTML: '',
     interests: '',
@@ -41,6 +42,7 @@ export default function EditProfilePage() {
         bannerColor: user.bannerColor || '',
         bannerPattern: user.bannerPattern || '',
         bannerPatternColor: user.bannerPatternColor || '',
+        bannerPatternScale: user.bannerPatternScale || DEFAULT_PATTERN_SCALE,
         customCSS: user.customCSS || '',
         customHTML: user.customHTML || '',
         interests: (user.interests || []).join(', '),
@@ -163,6 +165,19 @@ export default function EditProfilePage() {
                 </div>
               </div>
             </div>
+            {form.bannerPattern && (
+              <div className={styles.field}>
+                <label>Pattern scale ({form.bannerPatternScale.toFixed(2)}x)</label>
+                <input
+                  type="range"
+                  min={0.25}
+                  max={4}
+                  step={0.25}
+                  value={form.bannerPatternScale}
+                  onChange={e => setForm(prev => ({ ...prev, bannerPatternScale: Number(e.target.value) }))}
+                />
+              </div>
+            )}
             <div className={styles.field}>
               <label>Pattern</label>
               <div className={styles.patternGrid}>
@@ -182,7 +197,7 @@ export default function EditProfilePage() {
                     className={`${styles.patternSwatch} ${form.bannerPattern === pattern.id ? styles.patternSwatchActive : ''}`}
                     style={{
                       backgroundColor: form.bannerColor || DEFAULT_BANNER_COLOR,
-                      backgroundImage: patternDataUri(pattern, form.bannerPatternColor || '#ffffff', 0.4),
+                      ...getPatternLayerStyle(pattern, form.bannerPatternColor || '#ffffff', form.bannerPatternScale),
                     }}
                     onClick={() => setForm(prev => ({ ...prev, bannerPattern: pattern.id }))}
                     title={pattern.name}
