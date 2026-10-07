@@ -11,6 +11,7 @@ export default function GroupsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [search, setSearch] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['groups'],
@@ -27,7 +28,10 @@ export default function GroupsPage() {
     },
   });
 
-  const groups = data?.groups || [];
+  const q = search.trim().toLowerCase();
+  const groups = (data?.groups || []).filter((g: any) =>
+    !q || g.name.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q)
+  );
 
   return (
     <div className="container">
@@ -67,10 +71,19 @@ export default function GroupsPage() {
           </div>
         )}
 
+        <input
+          type="search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search groups..."
+          aria-label="Search groups"
+          className={styles.search}
+        />
+
         {isLoading ? (
           <p className={styles.empty}>Loading groups...</p>
         ) : groups.length === 0 ? (
-          <p className={styles.empty}>No groups yet. Be the first to create one.</p>
+          <p className={styles.empty}>{q ? `No groups match "${search.trim()}".` : 'No groups yet. Be the first to create one.'}</p>
         ) : (
           <div className={styles.grid}>
             {groups.map((g: any) => (
