@@ -20,6 +20,7 @@ export default function EditProfilePage() {
     location: '',
     website: '',
     mood: '',
+    favoriteSongUrl: '',
     bannerColor: '',
     bannerPattern: '',
     bannerPatternColor: '',
@@ -39,6 +40,7 @@ export default function EditProfilePage() {
         location: user.location || '',
         website: user.website || '',
         mood: user.mood || '',
+        favoriteSongUrl: user.favoriteSong?.url || '',
         bannerColor: user.bannerColor || '',
         bannerPattern: user.bannerPattern || '',
         bannerPatternColor: user.bannerPatternColor || '',
@@ -112,6 +114,15 @@ export default function EditProfilePage() {
             <div className={styles.field}>
               <label>Current Mood</label>
               <input value={form.mood} onChange={set('mood')} placeholder="excited, tired, vibing..." maxLength={100} />
+            </div>
+            <div className={styles.field}>
+              <label>Favorite Song</label>
+              <input
+                type="url"
+                value={form.favoriteSongUrl}
+                onChange={set('favoriteSongUrl')}
+                placeholder="Spotify, Apple Music, or YouTube Music song link"
+              />
             </div>
             <div className={styles.field}>
               <label>Interests <span className="text-muted">(comma-separated)</span></label>
@@ -261,7 +272,9 @@ export default function EditProfilePage() {
           </div>
 
           {updateProfile.isError && (
-            <p className="text-error">Failed to save. Please try again.</p>
+            <p className="text-error">
+              {(updateProfile.error as any)?.response?.data?.error || 'Failed to save. Please try again.'}
+            </p>
           )}
         </form>
       </div>

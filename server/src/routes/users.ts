@@ -3,6 +3,7 @@ import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import User from '../models/User';
 import Post from '../models/Post';
 import { sanitizeCustomHTML, sanitizeCustomCSS } from '../utils/sanitizeProfile';
+import { resolveFavoriteSong } from '../utils/musicLink';
 
 const router = Router();
 
@@ -98,6 +99,22 @@ router.put('/me/profile', requireAuth, async (req: AuthRequest, res: Response) =
       if (updates[field] === '') {
         delete updates[field];
         unset[field] = '';
+      }
+    }
+
+    // Favorite song: the client sends the link; we store the resolved metadata.
+    // Skip the provider round-trip when the link hasn't changed.
+    const songUrl = req.body.favoriteSongUrl;
+    if (typeof songUrl === 'string' && songUrl.trim() !== (req.user!.favoriteSong?.url || '')) {
+      if (!songUrl.trim()) {
+        unset.favoriteSong = '';
+      } else {
+        const song = await resolveFavoriteSong(songUrl).catch(() => null);
+        if (!song) {
+          res.status(400).json({ error: "Couldn't load that song. Paste a Spotify, Apple Music, or YouTube Music song link." });
+          return;
+        }
+        updates.favoriteSong = song;
       }
     }
 

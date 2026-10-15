@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import type { FavoriteSong } from '../utils/musicLink';
 
 export interface IUser extends Document {
   googleId: string;
@@ -17,6 +18,7 @@ export interface IUser extends Document {
   bannerPatternColor?: string;  // Foreground hex color for the tiled pattern
   bannerPatternScale?: number;  // Multiplier on the pattern's native tile size
   mood?: string;
+  favoriteSong?: FavoriteSong;  // Resolved from a Spotify / Apple Music / YouTube Music link at save time
   interests?: string[];
   friends: mongoose.Types.ObjectId[];
   friendRequests: mongoose.Types.ObjectId[];
@@ -52,6 +54,18 @@ const UserSchema = new Schema<IUser>(
     bannerPatternColor: { type: String, match: /^#[0-9a-f]{6}$/i },
     bannerPatternScale: { type: Number, min: 0.25, max: 4 },
     mood: { type: String, maxlength: 100 },
+    favoriteSong: {
+      type: new Schema(
+        {
+          url: String,
+          provider: { type: String, enum: ['spotify', 'apple', 'youtube'] },
+          title: { type: String, maxlength: 300 },
+          artist: { type: String, maxlength: 300 },
+          cover: String,
+        },
+        { _id: false }
+      ),
+    },
     interests: [{ type: String }],
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     friendRequests: [{ type: Schema.Types.ObjectId, ref: 'User' }],

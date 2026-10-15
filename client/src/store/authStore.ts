@@ -18,6 +18,7 @@ export interface User {
   bannerPatternColor?: string;
   bannerPatternScale?: number;
   mood?: string;
+  favoriteSong?: { url: string; provider: 'spotify' | 'apple' | 'youtube'; title: string; artist: string; cover: string };
   interests?: string[];
   friends: string[];
   friendRequests: string[];

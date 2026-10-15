@@ -134,6 +134,22 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {user.favoriteSong && (
+              <div className="card">
+                <h3 className={styles.sectionTitle}>Favorite Song</h3>
+                <a href={user.favoriteSong.url} target="_blank" rel="noopener noreferrer" className={styles.song}>
+                  <img src={user.favoriteSong.cover} className={styles.songCover} alt="" />
+                  <div className={styles.songInfo}>
+                    <div className={styles.songTitle}>{user.favoriteSong.title}</div>
+                    <div className={styles.songArtist}>{user.favoriteSong.artist}</div>
+                    <div className={styles.songProvider}>
+                      ▶ Play on {{ spotify: 'Spotify', apple: 'Apple Music', youtube: 'YouTube Music' }[user.favoriteSong.provider as string]}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            )}
+
             {/* Friends list */}
             {user.friends?.length > 0 && (
               <div className={`card ${styles.friendsCard}`}>
