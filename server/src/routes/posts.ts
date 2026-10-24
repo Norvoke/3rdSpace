@@ -160,6 +160,25 @@ router.post('/:postId/comments', requireAuth, async (req: AuthRequest, res: Resp
   }
 });
 
+router.post('/:postId/comments/:commentId/like', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) { res.status(404).json({ error: 'Post not found' }); return; }
+    const comment = post.comments.find(c => c._id.toString() === req.params.commentId);
+    if (!comment) { res.status(404).json({ error: 'Comment not found' }); return; }
+    const userId = req.user!._id;
+    const alreadyLiked = comment.likes.some(id => id.toString() === userId.toString());
+    await Post.updateOne(
+      { _id: post._id, 'comments._id': comment._id },
+      { [alreadyLiked ? '$pull' : '$addToSet']: { 'comments.$.likes': userId } }
+    );
+    cache.flushAll();
+    res.json({ liked: !alreadyLiked, likeCount: comment.likes.length + (alreadyLiked ? -1 : 1) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to toggle comment like' });
+  }
+});
+
 router.post('/:postId/like', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.postId);

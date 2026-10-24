@@ -137,6 +137,7 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
           avatar: user.avatar,
         },
         content,
+        likes: [],
         createdAt: new Date().toISOString(),
       };
 
@@ -163,6 +164,32 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
         ...p,
         comments: p.comments.filter((c: any) => c._id !== commentId),
       }));
+      for (const key of postQueryKeys) {
+        queryClient.setQueriesData({ queryKey: key, exact: false }, updateCache);
+      }
+
+      return { previousData };
+    },
+    onError: (_err, _vars, context: any) => {
+      context?.previousData?.forEach(([key, data]: any) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSettled: allPostQueries,
+  });
+
+  const likeCommentMutation = useMutation({
+    mutationFn: (commentId: string) => api.post(`/api/posts/${post._id}/comments/${commentId}/like`),
+    onMutate: async (commentId: string) => {
+      if (!user) return;
+      await Promise.all(postQueryKeys.map(key => queryClient.cancelQueries({ queryKey: key, exact: false })));
+      const previousData = postQueryKeys.flatMap(key => queryClient.getQueriesData({ queryKey: key, exact: false }));
+
+      const toggleLike = (c: any) => c._id !== commentId ? c : {
+        ...c,
+        likes: c.likes.includes(user._id) ? c.likes.filter((id: string) => id !== user._id) : [...c.likes, user._id],
+      };
+      const updateCache = updatePostInCache(post._id, (p: any) => ({ ...p, comments: p.comments.map(toggleLike) }));
       for (const key of postQueryKeys) {
         queryClient.setQueriesData({ queryKey: key, exact: false }, updateCache);
       }
@@ -269,9 +296,19 @@ export default function PostCard({ post, onDelete, highlightCommentId }: Props) 
               <div className={styles.commentBody}>
                 <span className={styles.commentAuthor}>{c.author.displayName}</span>
                 <span className={styles.commentText}>{c.content}</span>
-                <time className={styles.commentTime} title={new Date(c.createdAt).toLocaleString()}>
-                  {timeAgo(c.createdAt)}
-                </time>
+                <div className={styles.commentMeta}>
+                  <time className={styles.commentTime} title={new Date(c.createdAt).toLocaleString()}>
+                    {timeAgo(c.createdAt)}
+                  </time>
+                  <button
+                    className={`${styles.commentLike} ${user && c.likes.includes(user._id) ? styles.commentLiked : ''}`}
+                    onClick={() => likeCommentMutation.mutate(c._id)}
+                    disabled={!user || c._id.startsWith('temp-')}
+                    aria-label="Like comment"
+                  >
+                    ♥ {c.likes.length}
+                  </button>
+                </div>
               </div>
               {user && (user._id === c.author._id || user.username === 'finnellingwood') && (
                 <button

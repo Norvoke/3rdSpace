@@ -4,6 +4,7 @@ export interface IComment {
   _id: mongoose.Types.ObjectId;
   author: mongoose.Types.ObjectId;
   content: string;
+  likes: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
 
@@ -25,6 +26,7 @@ const CommentSchema = new Schema<IComment>(
   {
     author:    { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content:   { type: String, required: true, maxlength: 2000 },
+    likes:     [{ type: Schema.Types.ObjectId, ref: 'User' }],
     createdAt: { type: Date, default: Date.now },
   },
   { _id: true }
